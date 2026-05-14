@@ -37,6 +37,7 @@
                 <th>Status</th>
                 <th>Created At</th>
                 <th>Details</th>
+                <th>Purchase</th>
               </tr>
             </thead>
             <tbody id="product-table-body"></tbody>
@@ -45,6 +46,23 @@
 
         <div id="no-products" class="alert alert-info mt-3" style="display: none;">
           No products available.
+        </div>
+
+        <div class="modal fade" id="buyProductModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+
+              <div class="modal-header">
+                <h5 class="modal-title">Product Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+
+              <div class="modal-body">
+                Product details here
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -89,9 +107,23 @@
                 View Details
               </a>
             </td>
+            <td>
+              <a id="openModal" class="btn btn-primary btn-sm w-75 openModal">
+                Buy
+              </a>
+            </td>
           `;
 
           tbody.appendChild(row);
+          const openBtn = row.querySelector('.openModal');
+
+          openBtn.addEventListener('click', () => {
+            const modal = new bootstrap.Modal(
+              document.getElementById('buyProductModal')
+            );
+
+            modal.show();
+          });
         });
 
       } catch (error) {
