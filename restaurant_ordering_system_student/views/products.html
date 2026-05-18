@@ -37,18 +37,21 @@
                 <th>Status</th>
                 <th>Created At</th>
                 <th>Details</th>
-                <th>Purchase</th>
               </tr>
             </thead>
             <tbody id="product-table-body"></tbody>
           </table>
         </div>
-
+        <div class="d-flex justify-content-end">
+          <a id="openModal" class="btn btn-primary btn-sm w-25 openModal">
+            Buy
+          </a>
+        </div>
         <div id="no-products" class="alert alert-info mt-3" style="display: none;">
           No products available.
         </div>
 
-        <div class="modal fade" id="buyProductModal" tabindex="-1">
+        <!-- <div class="modal fade" id="buyProductModal" tabindex="-1">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
 
@@ -63,6 +66,28 @@
 
             </div>
           </div>
+        </div> -->
+        <div class="modal fade" id="buyProductModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+              <div class="modal-header">
+                <h5 class="modal-title">Buy Products</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+
+              <div class="modal-body">
+                <div id="modal-product-list"></div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                  Close
+                </button>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -71,66 +96,127 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', fetchProducts);
+  document.addEventListener('DOMContentLoaded', fetchProducts);
 
-    async function fetchProducts() {
-      try {
-        const response = await fetch('/products');
-        const data = await response.json();
+  let allProducts = [];
 
-        const tbody = document.getElementById('product-table-body');
-        const noProducts = document.getElementById('no-products');
+  async function fetchProducts() {
+    try {
+      const response = await fetch('/products');
+      const data = await response.json();
 
-        tbody.innerHTML = '';
+      const tbody = document.getElementById('product-table-body');
+      const noProducts = document.getElementById('no-products');
 
-        if (!data.success || data.products.length === 0) {
-          noProducts.style.display = 'block';
-          return;
-        }
+      tbody.innerHTML = '';
 
-        data.products.forEach(product => {
-          const row = document.createElement('tr');
-
-          row.innerHTML = `
-            <td>${product.name}</td>
-            <td>${product.description || '-'}</td>
-            <td>${product.category || '-'}</td>
-            <td>${parseFloat(product.price).toFixed(2)}</td>
-            <td>
-              <span class="badge ${product.is_available ? 'bg-success' : 'bg-secondary'}">
-                ${product.is_available ? 'Available' : 'Unavailable'}
-              </span>
-            </td>
-            <td>${new Date(product.created_at).toLocaleDateString()}</td>
-            <td>
-              <a href="/member/product-detail?id=${product.product_id}" class="btn btn-primary btn-sm">
-                View Details
-              </a>
-            </td>
-            <td>
-              <a id="openModal" class="btn btn-primary btn-sm w-75 openModal">
-                Buy
-              </a>
-            </td>
-          `;
-
-          tbody.appendChild(row);
-          const openBtn = row.querySelector('.openModal');
-
-          openBtn.addEventListener('click', () => {
-            const modal = new bootstrap.Modal(
-              document.getElementById('buyProductModal')
-            );
-
-            modal.show();
-          });
-        });
-
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        alert('Failed to load products.');
+      if (!data.success || data.products.length === 0) {
+        noProducts.style.display = 'block';
+        return;
       }
+
+      // store products globally
+      allProducts = data.products;
+
+      data.products.forEach(product => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+          <td>${product.name}</td>
+          <td>${product.description || '-'}</td>
+          <td>${product.category || '-'}</td>
+          <td>${parseFloat(product.price).toFixed(2)}</td>
+          <td>
+            <span class="badge ${product.is_available ? 'bg-success' : 'bg-secondary'}">
+              ${product.is_available ? 'Available' : 'Unavailable'}
+            </span>
+          </td>
+          <td>${new Date(product.created_at).toLocaleDateString()}</td>
+          <td>
+            <a href="/member/product-detail?id=${product.product_id}" class="btn btn-primary btn-sm">
+              View Details
+            </a>
+          </td>
+        `;
+
+        tbody.appendChild(row);
+      });
+
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      alert('Failed to load products.');
     }
-  </script>
+  }
+
+  // OPEN MODAL BUTTON
+  document.getElementById('openModal').addEventListener('click', () => {
+
+    const container = document.getElementById('modal-product-list');
+
+    container.innerHTML = '';
+
+    // show all products inside modal
+    allProducts.forEach(product => {
+
+      const item = document.createElement('div');
+
+      item.className = 'border rounded p-3';
+
+      item.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+
+          <!-- LEFT SIDE -->
+          <div>
+            <h5 class="mb-1">${product.name}</h5>
+
+            <p class="text-muted mb-0">
+              $${parseFloat(product.price).toFixed(2)}
+            </p>
+          </div>
+
+          <!-- RIGHT SIDE -->
+          <div class="d-flex align-items-center gap-2">
+
+            <button class="btn btn-outline-secondary btn-sm minus-btn">
+              -
+            </button>
+
+            <span class="quantity-value">0</span>
+
+            <button class="btn btn-outline-secondary btn-sm plus-btn">
+              +
+            </button>
+
+          </div>
+
+        </div>
+      `;
+      const minusBtn = item.querySelector('.minus-btn');
+      const plusBtn = item.querySelector('.plus-btn');
+      const quantityText = item.querySelector('.quantity-value');
+
+      let quantity = 0;
+
+      plusBtn.addEventListener('click', () => {
+        quantity++;
+        quantityText.innerText = quantity;
+      });
+
+      minusBtn.addEventListener('click', () => {
+        if (quantity > 0) {
+          quantity--;
+          quantityText.innerText = quantity;
+        }
+      });
+      container.appendChild(item);
+    });
+
+    const modal = new bootstrap.Modal(
+      document.getElementById('buyProductModal')
+    );
+
+    modal.show();
+  });
+</script>
 </body>
 </html>
