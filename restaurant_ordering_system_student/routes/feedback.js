@@ -8,22 +8,12 @@ router.get('/feedback', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../views/feedback/index.html'));
 })
 
+router.get('/feedback-edit', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/feedback/edit.html'))
+})
 
-// // routes/productsPage.js
-// const express = require('express');
-// const path = require('path');
-// const { ensureAuthenticated } = require('../middleware/auth');
-
-// const router = express.Router();
-
-// // GET /member/products - serve products page
-// router.get('/products', ensureAuthenticated, (req, res) => {
-//   res.sendFile(path.join(__dirname, '../views/products.html'));
-// });
-
-// // GET /member/product-detail - serve product detail page
-// router.get('/product-detail', ensureAuthenticated, (req, res) => {
-//   res.sendFile(path.join(__dirname, '../views/product-detail.html'));
-// });
+router.get('/feedback-create', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/feedback/create.html'))
+})
 
 module.exports = router;
