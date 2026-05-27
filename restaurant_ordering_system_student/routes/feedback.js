@@ -1,19 +1,68 @@
+// routes/products.js
 const express = require('express');
 const db = require('../config/database');
-const path = require('path');
 const router = express.Router();
-const {ensureAuthenticated} = require('../middleware/auth')
 
-router.get('/feedback', ensureAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/feedback/index.html'));
-})
+// GET /products - retrieve all products (member view)
+router.get('/', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        comments, 
+        ratings, 
+        last_updated
+    FROM dining_feedback
+    ORDER BY product_id ASC, last_updated DESC;
+    `;
 
-router.get('/feedback-edit', ensureAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/feedback/edit.html'))
-})
+    const result = await db.query(query);
 
-router.get('/feedback-create', ensureAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/feedback/create.html'))
-})
+    res.json({
+      success: true,
+      rows: result.rows
+    });
+
+  } catch (error) {
+    console.error('Error fetching dining_feedback:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve dining_feedback'
+    });
+  }
+});
+
+// GET /products/:id - retrieve a single product by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const query = `
+      SELECT product_id, name, description, price, category, is_available, created_at
+      FROM product
+      WHERE product_id = $1
+    `;
+
+    const result = await db.query(query, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      product: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve product'
+    });
+  }
+});
 
 module.exports = router;
