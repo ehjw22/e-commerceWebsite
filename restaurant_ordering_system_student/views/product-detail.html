@@ -104,8 +104,11 @@
   </script>
 
   <script type="module">
+    import {formatDate, createStarRating} from '../js/utilities.js';
+
     document.addEventListener('DOMContentLoaded', fetchProductDetail);
     document.addEventListener('DOMContentLoaded', fetchProductFeedback);
+
     async function fetchProductDetail() {
       const params = new URLSearchParams(window.location.search);
       const productId = params.get('id');
@@ -158,7 +161,7 @@
         errorMessage.style.display = 'block';
       }
     }
-    import {formatDate, createStarRating} from '../js/utilities.js';
+    
     async function fetchProductFeedback() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -197,10 +200,18 @@
                 ${fb.comments || 'No comment provided.'}
               </p>
 
-              <!-- Reply button -->
-              <div class="text-end">
-                <button class="btn btn-sm btn-outline-primary">
-                  Reply
+              <div class="d-flex mt-4 gap-2 align-items-center">
+                <input 
+                  type="text"
+                  class="form-control form-control-sm"
+                  placeholder="Write a response..."
+                  id="reply-input-${fb.feedback_id}"
+                />
+
+                <button 
+                  class="btn btn-sm btn-primary"
+                  onclick="submitReply(${fb.feedback_id})">
+                  Post
                 </button>
               </div>
 
