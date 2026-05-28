@@ -89,15 +89,15 @@
           feedbackList.innerHTML = `
             <div class="no-feedback">
               <h4>No feedback given yet</h4>
-              <p class="text-muted">Be the first to leave a review!</p>
+              <p class="text-muted">Give your first review!</p>
             </div>
           `;
           return;
         }
 
         // Generate feedback cards
-        feedbackList.innerHTML = data.map(feedback => {
-          const rating = feedback.rating || 0;
+        feedbackList.innerHTML = data.rows.map(feedback => {
+          const rating = feedback.ratings || 0;
 
           // Generate stars
           let stars = '';
@@ -112,7 +112,14 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <div class="stars">${stars}</div>
                   <div class="feedback-date">
-                    ${new Date(feedback.last_updated).toLocaleString()}
+                    ${new Date(feedback.last_updated).toLocaleString('en-SG', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
                   </div>
                 </div>
 
