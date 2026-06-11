@@ -84,18 +84,58 @@
       </div>
     </div>
 
-    <!-- Product Feedback Section -->
-    <div id="feedback-section" class="mt-5" style="display:none;">
+    <!-- Feedback section -->
+    <div class="mt-5">
+
       <h4 class="mb-3">Customer Feedback</h4>
 
-      <div id="feedback-list" class="d-flex justify-content-center"></div>
-    </div>
+      <!-- Leave Feedback-->
+      <div class="card mb-4" style="max-width:650px;">
+        <div class="card-body">
 
-    <!-- No Feedback Message -->
-    <div id="no-feedback" class="alert alert-info mt-4" style="display:none;">
-      No feedback given yet for this product.
-    </div>
+          <h6 class="mb-3">Write a comment</h6>
 
+          <div class="mb-2">
+            <label class="form-label">Rating: <span id="rating-value">5</span>/5</label>
+
+            <input
+              type="range"
+              min="1"
+              max="5"
+              value="3"
+              class="form-range"
+              id="rating-input"
+              oninput="document.getElementById('rating-value').innerText = this.value"
+            />
+          </div>
+
+          <div class="d-flex gap-4">
+            <textarea
+              id="comment-input"
+              class="form-control"
+              rows="1"
+              placeholder="Add a comment..."
+            ></textarea>
+
+            <button class="btn btn-success" onclick="submitFeedback()">
+              Post
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Feedback list -->
+      <div id="feedback-section">
+        <div id="feedback-list"></div>
+      </div>
+
+      <!-- No feedback -->
+      <div id="no-feedback" class="alert alert-info mt-3" style="display:none;">
+        No feedback yet. Be the first to comment.
+      </div>
+
+    </div>
   </main>
 
   <!-- Bootstrap JS -->
@@ -222,6 +262,12 @@
       } catch (err) {
         console.error('Error loading feedback:', err);
       }
+    }
+  </script>
+
+  <script>
+    async function submitFeedback() {
+      
     }
   </script>
 
