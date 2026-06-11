@@ -168,6 +168,75 @@
     updateTotal();
   }
 
+  async function submitOrder() {
+    const items = [];
+
+    for (const productId in cart) {
+
+      if (cart[productId].qty > 0) {
+        items.push({
+          productId: Number(productId),
+          quantity: cart[productId].qty
+        });
+      }
+
+    }
+
+    if (items.length === 0) {
+      alert('Please select at least one product.');
+      return;
+    }
+
+    try {
+
+      const response = await fetch('/products/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: items
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Purchase failed');
+      }
+
+      alert(
+        `Order #${data.orderId} placed successfully!\nTotal: $${data.totalAmount}`
+      );
+
+      // Reset cart
+      Object.keys(cart).forEach(id => {
+        cart[id].qty = 0;
+
+        const qtyElement = document.getElementById(`qty-${id}`);
+        if (qtyElement) {
+          qtyElement.innerText = '0';
+        }
+      });
+
+      updateTotal();
+
+      const modalElement = document.getElementById('buyProductModal');
+      const modal = bootstrap.Modal.getInstance(modalElement);
+
+      if (modal) {
+        modal.hide();
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(error.message || 'Failed to place order.');
+
+    }
+  }
+
   function updateTotal() {
     let total = 0;
     
@@ -217,6 +286,6 @@
 
     modal.show();
   });
-</script>
+  </script>
 </body>
 </html>

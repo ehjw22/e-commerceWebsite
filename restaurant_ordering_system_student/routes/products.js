@@ -62,4 +62,105 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /products/buy - buy products
+router.post('/purchase', async (req, res) => {
+  const client = await db.connect();
+
+  try {
+    const memberId = req.session.userId;
+    const { items } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No items selected'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    let totalAmount = 0;
+
+    // Calculate total from DB prices
+    for (const item of items) {
+      const productResult = await client.query(
+        `
+          SELECT product_id, price
+          FROM product
+          WHERE product_id = $1
+        `, [item.productId]
+      );
+
+      if (productResult.rows.length === 0) {
+        throw new Error('Product not found');
+      }
+
+      const product = productResult.rows[0];
+
+      // if (product.stock < item.quantity) {
+      //   throw new Error(
+      //     `Insufficient stock for product ${product.product_id}`
+      //   );
+      // }
+
+      totalAmount += product.price * item.quantity;
+    }
+
+    // Create order
+    const orderResult = await client.query(
+      `
+        INSERT INTO sale_order (member_id, total_amount, status, delivery_address, order_date)
+        VALUES ($1, $2, 'COMPLETED', '123 Main Street', NOW())
+
+        RETURNING order_id
+      `, [memberId, totalAmount]
+    );
+
+    const orderId = orderResult.rows[0].order_id;
+
+    // Create order items + reduce stock
+    for (const item of items) {
+
+      const productResult = await client.query(
+        `
+          SELECT price
+          FROM product
+          WHERE product_id = $1
+        `, [item.productId]
+      );
+
+      const unitPrice = productResult.rows[0].price;
+
+      await client.query(
+        `
+          INSERT INTO sale_order_item (order_id, product_id, quantity, unit_price, subtotal)
+          VALUES ($1, $2, $3, $4, $5)
+        `, [orderId, item.productId, item.quantity, unitPrice, item.quantity * unitPrice]
+      );
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      orderId,
+      totalAmount
+    });
+
+  } catch (error) {
+
+    await client.query('ROLLBACK');
+
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
