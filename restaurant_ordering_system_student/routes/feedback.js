@@ -3,7 +3,7 @@ const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
 
-// GET /products - retrieve all products (member view)
+// GET /feedback - retrieve all feedback from a member
 router.get('/', async (req, res) => {
   try {
 
@@ -35,6 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /feedback/:id - retrive all feedback of a product
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -72,5 +73,31 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /feedback
+router.post('/', async (req, res) => {
+  try {
+
+    const {feedback, ratings, product_id} = req.body;
+    const member_id = req.session.userId;
+
+    const query = `
+      CALL create_feedback($1, $2, $3, $4)  
+    `;
+
+    const result = await db.query(query, [feedback, ratings, member_id, product_id]);
+
+    res.json({
+      success: true,
+      message: 'Feedback submitted successfully'
+    })
+
+  } catch (error) {
+    console.error('Error creating feedback:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 
 module.exports = router;
