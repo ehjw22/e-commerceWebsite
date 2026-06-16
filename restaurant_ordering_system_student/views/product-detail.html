@@ -96,7 +96,7 @@
           <h6 class="mb-3">Write a comment</h6>
 
           <div class="mb-2">
-            <label class="form-label">Rating: <span id="rating-value">5</span>/5</label>
+            <label class="form-label">Rating: <span id="rating-value">3</span>/5</label>
 
             <input
               type="range"
@@ -145,7 +145,7 @@
 
   <script type="module">
     import {formatDate, createStarRating} from '../js/utilities.js';
-
+    window.submitFeedback = submitFeedback;
     document.addEventListener('DOMContentLoaded', fetchProductDetail);
     document.addEventListener('DOMContentLoaded', fetchProductFeedback);
 
@@ -263,11 +263,43 @@
         console.error('Error loading feedback:', err);
       }
     }
-  </script>
 
-  <script>
     async function submitFeedback() {
-      
+      try {
+        const productId = new URLSearchParams(window.location.search).get('id');
+
+        const ratings = document.getElementById('rating-input').value;
+        const comments = document.getElementById('comment-input').value;
+
+        const res = await fetch('/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({
+            product_id: productId,
+            ratings: Number(ratings),
+            feedback: comments
+          })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          alert(data.message || 'Failed to submit feedback');
+          return;
+        }
+
+         document.getElementById('comment-input').value = '';
+        document.getElementById('rating-input').value = 3;
+        document.getElementById('rating-value').innerText = 3;
+
+        // refresh list
+        fetchProductFeedback();
+
+      } catch (err) {
+        console.error('Error creating feedback:', err);
+      }
     }
   </script>
 
