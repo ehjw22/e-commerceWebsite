@@ -34,3 +34,18 @@ app.use('/feedback', require('./routes/feedback'));
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+app.get('/auth/status', (req, res) => {
+    if (req.session && req.session.userId) {
+        return res.json({
+            authenticated: true,
+            user: {
+                id: req.session.userId,
+                role: req.session.userRole,
+                name: req.session.userName
+            }
+        });
+    }
+
+    res.json({ authenticated: false, user: null});
+});
