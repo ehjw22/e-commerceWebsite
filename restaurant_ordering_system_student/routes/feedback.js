@@ -101,4 +101,31 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE /feedback/:id - delete a feedback by its id
+router.delete('/:id', async (req, res) => {
+  try {
+    const feedbackId = parseInt(req.params.id);
+    const member_id = req.session.userId;
+
+    const query = `
+      CALL delete_feedback($1, $2)
+    `;
+
+    await db.query(query, [feedbackId, member_id]);
+
+    res.json({
+      success: true,
+      message: 'Feedback deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error deleting feedback:', error);
+
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+})
+
 module.exports = router;
