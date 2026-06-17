@@ -44,7 +44,8 @@ router.get('/:id', async (req, res) => {
       SELECT 
         comments, 
         ratings, 
-        last_updated
+        last_updated,
+        member_id
     FROM dining_feedback
     WHERE product_id = $1
     ORDER BY last_updated DESC;
