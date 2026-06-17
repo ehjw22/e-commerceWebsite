@@ -42,6 +42,7 @@ router.get('/:id', async (req, res) => {
 
     const query = `
       SELECT 
+        feedback_id,
         comments, 
         ratings, 
         last_updated,

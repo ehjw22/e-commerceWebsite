@@ -146,6 +146,7 @@
   <script type="module">
     import {formatDate, createStarRating} from '../js/utilities.js';
     window.submitFeedback = submitFeedback;
+    window.deleteFeedback = deleteFeedback;
     document.addEventListener('DOMContentLoaded', fetchProductDetail);
     document.addEventListener('DOMContentLoaded', fetchProductFeedback);
 
@@ -218,6 +219,7 @@
         const userIdData = await userIdRes.json();
         
         let userId = ''
+
         if (userIdData.authenticated) {
           userId = userIdData.user.id
         }
@@ -254,7 +256,7 @@
                   </button>
 
                   <button class="btn btn-sm btn-outline-danger"
-                    onclick="deleteFeedback()">
+                    onclick="deleteFeedback(${fb.feedback_id})">
                     Delete
                   </button>
                 </div>
@@ -319,6 +321,30 @@
 
       } catch (err) {
         console.error('Error creating feedback:', err);
+      }
+    }
+
+    async function deleteFeedback(feedbackId) {
+      console.log(feedbackId)
+      try {
+        const response = await fetch(`/feedback/${feedbackId}`, {
+          method : 'Delete',
+          headers : {
+            'Content-Type' : 'application/json' 
+          }
+        }) 
+
+        const data = await response.json();
+
+        if (!data.success) {
+          alert(data.message);
+        } else {
+          alert(data.message);
+        }
+        fetchProductFeedback()
+
+      } catch (err) {
+        console.error('Error deleting feedback:', err);
       }
     }
   </script>
