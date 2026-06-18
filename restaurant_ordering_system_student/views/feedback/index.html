@@ -82,8 +82,8 @@
         const data = await response.json();
 
         const feedbackList = document.getElementById('feedbackList');
-        console.error(data)
-        console.error(data.rows)
+        // console.error(data)
+        // console.error(data.rows)
         // No feedback
         if (!data || data.rows.length === 0) {
           feedbackList.innerHTML = `
@@ -94,25 +94,31 @@
           `;
           return;
         }
-
+        
         // Generate feedback cards
         feedbackList.innerHTML = data.rows.map(feedback => {
           const rating = feedback.ratings || 0;
 
           return `
-            <div class="card feedback-card">
+            <div class="card feedback-card mb-3">
               <div class="card-body">
                 
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <div class="stars">${createStarRating(rating)}</div>
-                  <div class="feedback-date">
-
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary">ID: #${feedback.feedback_id}</span>
+                    <div class="stars">${createStarRating(rating)}</div>
+                  </div>
+                  <div class="feedback-date text-muted small">
                     ${formatDate(feedback.last_updated)}
                   </div>
                 </div>
 
-                <p class="card-text mb-0">
-                  ${feedback.comments || 'No comments provided.'}
+                <h5 class="card-title h6 mb-2 text-primary">
+                  Product: <span class="text-dark font-weight-bold">${feedback.product_name || 'Unknown Product'}</span>
+                </h5>
+
+                <p class="card-text mb-0 mt-2 text-secondary">
+                  ${feedback.comments || '<em>No comments provided.</em>'}
                 </p>
 
               </div>
