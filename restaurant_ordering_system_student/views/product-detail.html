@@ -136,6 +136,69 @@
       </div>
 
     </div>
+
+    <div class="modal fade" id="editFeedbackModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Feedback</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal">
+            </button>
+          </div>
+
+          <div class="modal-body">
+
+            <input type="hidden" id="edit-feedback-id">
+
+            <div class="mb-3">
+              <label class="form-label">Rating</label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                value="3"
+                class="form-range"
+                id="edit-rating"
+                oninput="document.getElementById('edit-rating-value').innerText = this.value"
+              >
+              <small>
+                Rating:
+                <span id="edit-rating-value">3</span>/5
+              </small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Comment</label>
+              <textarea
+                id="edit-comment"
+                class="form-control"
+                rows="4">
+              </textarea>
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button
+              class="btn btn-secondary"
+              data-bs-dismiss="modal">
+              Cancel
+            </button>
+
+            <button
+              class="btn btn-primary"
+              onclick="saveFeedback()">
+              Save Changes
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Bootstrap JS -->
@@ -145,8 +208,12 @@
 
   <script type="module">
     import {formatDate, createStarRating} from '../js/utilities.js';
+
     window.submitFeedback = submitFeedback;
     window.deleteFeedback = deleteFeedback;
+    window.editFeedback = editFeedback;
+    window.saveFeedback = saveFeedback; 
+
     document.addEventListener('DOMContentLoaded', fetchProductDetail);
     document.addEventListener('DOMContentLoaded', fetchProductFeedback);
 
@@ -251,7 +318,7 @@
               ${Number(fb.member_id) === Number(userId) ? `
                 <div class="d-flex gap-2 mb-2">
                   <button class="btn btn-sm btn-outline-primary"
-                    onclick="startEdit()">
+                    onclick="editFeedback(${fb.feedback_id}, ${fb.ratings}, \'${fb.comments}\')">
                     Edit
                   </button>
 
@@ -345,6 +412,66 @@
 
       } catch (err) {
         console.error('Error deleting feedback:', err);
+      }
+    }
+    
+    function editFeedback(feedbackId, rating, comment) {
+      console.log(feedbackId, rating, comment)
+      document.getElementById('edit-feedback-id').value = feedbackId;
+
+      document.getElementById('edit-rating').value = rating;
+      document.getElementById('edit-rating-value').innerText = rating;
+
+      document.getElementById('edit-comment').value = comment;
+
+      const modal = new bootstrap.Modal(
+        document.getElementById('editFeedbackModal')
+      );
+
+      modal.show();
+    }
+
+    async function saveFeedback() {
+      try {
+
+        const feedbackId =
+          document.getElementById('edit-feedback-id').value;
+
+        const rating =
+          document.getElementById('edit-rating').value;
+
+        const comment =
+          document.getElementById('edit-comment').value;
+
+        const response = await fetch(`/feedback/${feedbackId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ratings: rating,
+            comments: comment
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          alert(data.message);
+          return;
+        }
+
+        bootstrap.Modal.getInstance(
+          document.getElementById('editFeedbackModal')
+        ).hide();
+
+        alert('Feedback has been updated');
+        
+        fetchProductFeedback();
+
+      } catch (err) {
+        console.error(err);
+        alert('Failed to update feedback');
       }
     }
   </script>
