@@ -129,4 +129,31 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
+// PUT /feedback/:id - update a feedback by its id
+router.put('/:id', async (req, res) => {
+  try {
+    const feedbackId = parseInt(req.params.id);
+    const {ratings, comments} = req.body;
+    const member_id = req.session.userId;
+
+    const query = `
+      CALL edit_feedback($1, $2, $3, $4)
+    `;
+
+    await db.query(query, [feedbackId, member_id, comments, ratings]);
+
+    res.json({
+      success: true,
+      message: 'Feedback successfully editted'
+    })
+  } catch (error) {
+    console.error('Error updating feedbacK:', error);
+
+    res.status(400).json({
+      success: false,
+      message: error.message
+    })
+  }
+})
+
 module.exports = router;
