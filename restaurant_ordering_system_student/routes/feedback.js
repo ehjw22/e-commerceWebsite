@@ -10,13 +10,7 @@ router.get('/', async (req, res) => {
     const userId = req.session.userId
 
     const query = `
-    SELECT 
-        comments, 
-        ratings, 
-        last_updated
-    FROM dining_feedback
-    WHERE member_id = $1
-    ORDER BY product_id ASC, last_updated DESC;
+      SELECT * FROM get_feedback($1)
     `;
 
     const result = await db.query(query, [userId]);
@@ -137,7 +131,7 @@ router.put('/:id', async (req, res) => {
     const member_id = req.session.userId;
 
     const query = `
-      CALL edit_feedback($1, $2, $3, $4)
+      CALL update_feedback($1, $2, $3, $4)
     `;
 
     await db.query(query, [feedbackId, member_id, comments, ratings]);
