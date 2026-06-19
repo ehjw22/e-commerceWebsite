@@ -29,21 +29,27 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /feedback/:id - retrive all feedback of a product
+// GET /feedback/:id - retrive all feedback of a product and the responses to that feedback
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
     const query = `
-      SELECT 
-        feedback_id,
-        comments, 
-        ratings, 
-        last_updated,
-        member_id
-    FROM dining_feedback
-    WHERE product_id = $1
-    ORDER BY last_updated DESC;
+    SELECT 
+      df.feedback_id,
+      df.comments, 
+      df.ratings, 
+      df.last_updated,
+      df.member_id,
+      f.comments as "responses",
+      df.product_id,
+      f.member_id as "responder_id",
+      m.username as "responder_username"
+    FROM dining_feedback df
+    LEFT JOIN feedback f on df.feedback_id = f.dining_feedback_id
+    LEFT JOIN member m on m.member_id = f.member_id
+    WHERE df.product_id = $1
+    ORDER BY df.last_updated DESC;
     `;
 
     const result = await db.query(query, [id]);
