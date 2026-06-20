@@ -21,7 +21,16 @@ router.get('/', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching dining_feedback:', error);
+    // console.error('Error fetching dining_feedback:', error);
+    console.error(error)
+    if (error.code === 'P0002') {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+        rows: 0
+      })
+    };
+
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve dining_feedback'

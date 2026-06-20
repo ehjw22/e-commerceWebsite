@@ -75,17 +75,12 @@
       try {
         const response = await fetch('/feedback');
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch feedback');
-        }
-
         const data = await response.json();
 
         const feedbackList = document.getElementById('feedbackList');
-        // console.error(data)
-        // console.error(data.rows)
+
         // No feedback
-        if (!data || data.rows.length === 0) {
+        if (!data || data.rows === 0) {
           feedbackList.innerHTML = `
             <div class="no-feedback">
               <h4>No feedback given yet</h4>
