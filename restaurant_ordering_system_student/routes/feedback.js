@@ -2,9 +2,10 @@
 const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
+const auth = require('../middleware/auth');
 
 // GET /feedback - retrieve all feedback from a member
-router.get('/', async (req, res) => {
+router.get('/', auth.ensureAuthenticated, async (req, res) => {
   try {
 
     const userId = req.session.userId
@@ -85,7 +86,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /feedback
-router.post('/', async (req, res) => {
+router.post('/', auth.ensureAuthenticated, async (req, res) => {
   try {
 
     const {feedback, ratings, product_id} = req.body;
@@ -104,7 +105,7 @@ router.post('/', async (req, res) => {
 
   } catch (error) {
     console.error('Error creating feedback:', error);
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: error.message
     });
@@ -112,7 +113,7 @@ router.post('/', async (req, res) => {
 });
 
 // DELETE /feedback/:id - delete a feedback by its id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth.ensureAuthenticated, async (req, res) => {
   try {
     const feedbackId = parseInt(req.params.id);
     const member_id = req.session.userId;
@@ -131,7 +132,7 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting feedback:', error);
 
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: error.message
     });
@@ -139,7 +140,7 @@ router.delete('/:id', async (req, res) => {
 })
 
 // PUT /feedback/:id - update a feedback by its id
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth.ensureAuthenticated, async (req, res) => {
   try {
     const feedbackId = parseInt(req.params.id);
     const {ratings, comments} = req.body;
@@ -158,7 +159,7 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error updating feedbacK:', error);
 
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: error.message
     })
