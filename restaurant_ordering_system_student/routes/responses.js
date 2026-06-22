@@ -2,6 +2,50 @@
 const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
+const auth = require('../middleware/auth');
+
+// GET /responses - retrieve all responses of a user
+router.get('/', auth.ensureAuthenticated, async (req, res) => {
+  try {
+
+    const userId = req.session.userId
+
+    const query = `
+      SELECT * FROM get_response($1)
+    `;
+
+    const result = await db.query(query, [userId]);
+
+    res.json({
+      success: true,
+      rows: result.rows
+    });
+
+  } catch (error) {
+    console.error('Error fetching responses:', error);
+
+    if (error.code === 'P0003') {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+        rows: 0
+      });
+    }
+
+    if (error.code === 'P0002') {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+        rows: 0
+      })
+    };
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve responses'
+    });
+  }
+});
 
 // POST /responses/:id - Create a new response by the dining feedback ID
 router.post('/:id', async (req, res) => {
