@@ -8,7 +8,7 @@ router.post('/:id', async (req, res) => {
   try {
     const diningFeedbackId = parseInt(req.params.id);
     const {response} = req.body;
-    const member_id = req.session.userId
+    const member_id = 1
 
     const query = `
       CALL create_response($1, $2, $3)
@@ -22,6 +22,32 @@ router.post('/:id', async (req, res) => {
     })
   } catch (error) {
     console.error('Error creating response:', error);
+
+    res.status(400).json({
+      success: false,
+      message: error.message
+    })
+  }
+});
+
+// DELETE /responses/:id - Delete a response based on its id
+router.delete('/:id', async (req, res) => {
+  try {
+    const responseId = parseInt(req.params.id);
+    const member_id = req.session.userId
+
+    const query = `
+      CALL delete_response($1, $2)
+    `;
+
+    await db.query(query, [responseId, member_id]);
+
+    res.json({
+      success: true,
+      message: 'Response successfully deleted.'
+    })
+  } catch (error) {
+    console.error('Error deleting response:', error);
 
     res.status(400).json({
       success: false,
