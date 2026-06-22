@@ -8,7 +8,7 @@ router.post('/:id', async (req, res) => {
   try {
     const diningFeedbackId = parseInt(req.params.id);
     const {response} = req.body;
-    const member_id = 1
+    const member_id = req.session.userId
 
     const query = `
       CALL create_response($1, $2, $3)
