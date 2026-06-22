@@ -21,7 +21,7 @@ router.post('/:id', async (req, res) => {
       message: 'Response successfully added.'
     })
   } catch (error) {
-    console.error('Error updating feedbacK:', error);
+    console.error('Error creating response:', error);
 
     res.status(400).json({
       success: false,
