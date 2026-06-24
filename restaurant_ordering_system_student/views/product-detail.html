@@ -213,6 +213,7 @@
     window.deleteFeedback = deleteFeedback;
     window.editFeedback = editFeedback;
     window.saveFeedback = saveFeedback; 
+    window.createResponse = createResponse;
 
     document.addEventListener('DOMContentLoaded', fetchProductDetail);
     document.addEventListener('DOMContentLoaded', fetchProductFeedback);
@@ -379,7 +380,7 @@
 
                 <button 
                   class="btn btn-sm btn-primary"
-                  onclick="submitReply(${fb.feedback_id})">
+                  onclick="createResponse(${fb.feedback_id})">
                   Post
                 </button>
               </div>` : ``}
@@ -559,6 +560,43 @@
       } catch (err) {
         console.error(err);
         alert('Failed to update feedback');
+      }
+    }
+  
+    async function createResponse(feedbackId) {
+      try {
+        const inputElement = document.getElementById(`reply-input-${feedbackId}`);
+        const responseText = inputElement.value.trim();
+
+        if (!responseText) {
+          alert("Please write something before posting!");
+          return;
+        }
+
+        const res = await fetch(`/response/${feedbackId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            response: responseText
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          inputElement.value = '';
+          
+          alert(data.message);
+          fetchProductFeedback();
+        } else {
+          alert(data.message || "Failed to submit response.");
+        }
+
+      } catch (err) {
+        console.error('Error creating response:', err);
+        alert("An error occurred while posting your response.");
       }
     }
   </script>

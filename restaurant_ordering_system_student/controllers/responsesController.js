@@ -1,4 +1,4 @@
-// controllers/responseController.js
+// controllers/responsesController.js
 const Response = require('../models/responsesModel');
 
 class ResponseController {
