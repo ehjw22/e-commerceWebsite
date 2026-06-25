@@ -363,6 +363,14 @@
                         @${reply.username || 'unknown_user'} 
                         ${Number(reply.responder_id) === Number(userId) ? '<span class="text-muted fw-normal">(You)</span>' : ''}
                       </strong>
+                      
+                      ${Number(reply.responder_id) === Number(userId) ? `
+                        <button 
+                          class="btn btn-link text-danger p-0 m-0 style="font-size: 0.8rem; text-decoration: none;" 
+                          onclick="deleteResponse(${reply.response_id})">
+                          Delete
+                        </button>
+                      ` : ''}
                     </div>
                     <p class="mb-0 text-dark">${reply.text}</p>
                   </div>
