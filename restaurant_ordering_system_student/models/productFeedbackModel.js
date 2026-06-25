@@ -21,7 +21,8 @@ class Feedback {
                 f.comments as "responses",
                 df.product_id,
                 f.member_id as "responder_id",
-                m.username as "responder_username"
+                m.username as "responder_username",
+                f.feedback_id as "response_id"
             FROM dining_feedback df
             LEFT JOIN feedback f on df.feedback_id = f.dining_feedback_id
             LEFT JOIN member m on m.member_id = f.member_id

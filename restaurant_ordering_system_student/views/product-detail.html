@@ -214,6 +214,7 @@
     window.editFeedback = editFeedback;
     window.saveFeedback = saveFeedback; 
     window.createResponse = createResponse;
+    window.deleteResponse = deleteResponse;
 
     document.addEventListener('DOMContentLoaded', fetchProductDetail);
     document.addEventListener('DOMContentLoaded', fetchProductFeedback);
@@ -320,7 +321,8 @@
                 feedbackMap[row.feedback_id].replies.push({
                     text: row.responses,
                     responder_id: row.responder_id,
-                    username: row.responder_username
+                    username: row.responder_username,
+                    response_id: row.response_id
                 });
             }
         });
@@ -605,6 +607,28 @@
       } catch (err) {
         console.error('Error creating response:', err);
         alert("An error occurred while posting your response.");
+      }
+    }
+
+    async function deleteResponse(responseId) {
+      try {
+        const res = await fetch(`/response/${responseId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert(data.message);
+          fetchProductFeedback();
+        } 
+
+      } catch (err) {
+        console.error('Error deleting response:', err);
+        alert("An error occurred while deleting your response.");
       }
     }
   </script>
