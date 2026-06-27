@@ -3,7 +3,7 @@ const SaleOrder = require('../models/SaleOrder');
 const Product = require('../models/Product');
 
 class DashboardController {
-    static async index(req, res) {
+    static async getApiData(req, res) {
         try {
             const filters = {
                 startDate: req.query.start_date,
@@ -16,11 +16,12 @@ class DashboardController {
             const orders = await SaleOrder.getSummary(filters);
             const categories = await Product.getCategories();
 
-            res.render('dashboard', { 
+            res.status(200).json({ 
                 orders, 
                 categories, 
                 filters, 
-                user: req.session.user 
+                user: req.session.user ,
+                success: true
             });
         } catch (error) {
             console.error('Error loading dashboard:', error);
