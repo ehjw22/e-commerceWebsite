@@ -3,9 +3,9 @@ const pool = require('../config/database');
 
 class Response {
     // Retrieves all responses written by a specific user via custom function
-    static async findByUserId(userId) {
+    static async get(memberId) {
         const query = `SELECT * FROM get_response($1)`;
-        const result = await pool.query(query, [userId]);
+        const result = await pool.query(query, [memberId]);
         return result.rows;
     }
 
