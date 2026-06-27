@@ -2,6 +2,8 @@ import {formatDate, createStarRating} from '../../js/utilities.js';
 
 document.addEventListener("DOMContentLoaded", retrieveAllFeedback);
 
+window.handleEdit = handleEdit;
+
 async function retrieveAllFeedback() {
     try {
         const response = await fetch('/feedback');
@@ -49,10 +51,10 @@ async function retrieveAllFeedback() {
 
                     <!-- Edit and Delete Actions -->
                     <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                        <button class="btn btn-sm btn-outline-primary edit-btn"">
+                        <button class="btn btn-sm btn-outline-primary edit-btn" onclick="handleEdit(${feedback.feedback_id})">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-outline-danger delete-btn"">
+                        <button class="btn btn-sm btn-outline-danger delete-btn">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -67,4 +69,8 @@ async function retrieveAllFeedback() {
         console.error('Error fetching dining feedback:', error);
         alert('Failed to load dining feedback.');
     }
+}
+
+function handleEdit(feedbackId) {
+    window.location.href = `/member/feedback/edit?id=${feedbackId}`;
 }
