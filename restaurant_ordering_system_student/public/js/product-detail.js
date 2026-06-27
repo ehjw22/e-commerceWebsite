@@ -138,12 +138,12 @@ async function fetchProductFeedback() {
             <div class="d-flex gap-2 mb-3">
                 <button class="btn btn-sm btn-outline-primary"
                 onclick="editFeedback(${fb.feedback_id}, ${fb.ratings}, \'${fb.comments}\')">
-                Edit
+                <i class="bi bi-pencil"></i> Edit
                 </button>
 
                 <button class="btn btn-sm btn-outline-danger"
                 onclick="deleteFeedback(${fb.feedback_id})">
-                Delete
+                <i class="bi bi-trash"></i> Delete
                 </button>
             </div>
             ` : ''}
