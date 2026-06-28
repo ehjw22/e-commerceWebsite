@@ -119,6 +119,25 @@ class ProductFeedbackController {
             });
         }
     }
+
+    static async getFeedbackById(req, res) {
+        try {
+            const feedbackId = parseInt(req.params.id);
+
+            const rows = await feedbackModel.retrieveFeedbackById(feedbackId);
+
+            res.json({
+                success: true,
+                rows
+            });
+        } catch (error) {
+            console.error('Error retrieving feedback:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 }
 
 module.exports = ProductFeedbackController;
