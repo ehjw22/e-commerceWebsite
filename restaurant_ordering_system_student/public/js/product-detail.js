@@ -68,7 +68,7 @@ async function fetchProductFeedback() {
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
 
-    const res = await fetch(`/feedback/${productId}`);
+    const res = await fetch(`/feedback/product/${productId}`);
     const data = await res.json();
 
     const feedbackSection = document.getElementById('feedback-section');
