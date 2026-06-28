@@ -53,6 +53,15 @@ class Feedback {
         await pool.query(query, [feedbackId, memberId, comments, ratings]);
         return true;
     }
+
+    static async retrieveFeedbackById(feedbackId) {
+        const query = `
+            SELECT * FROM dining_feedback df
+            JOIN product p on p.product_id = df.product_id
+            WHERE feedback_id = $1`;
+        const result = await pool.query(query, [feedbackId]);
+        return result.rows;
+    }
 }
 
 module.exports = Feedback;
