@@ -20,6 +20,7 @@ async function retrieveAllResponses() {
         }
 
         responsesList.innerHTML = responseItems.map(res => {
+            const responseId = res.feedback_id;
             return `
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body p-3">
@@ -37,7 +38,16 @@ async function retrieveAllResponses() {
                     </div>
 
                     <div class="pt-2 border-top border-light">
-                        <span class="badge bg-primary mb-1">Your Reply</span>
+                        <!-- Placed Delete link side-by-side with your Reply Badge -->
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-primary">Your Reply</span>
+                            <button 
+                                class="btn btn-link text-danger p-0 m-0 text-decoration-none small" 
+                                style="font-size: 0.8rem;"
+                                onclick="deleteResponse(${responseId})">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
                         <p class="card-text text-dark fw-bold mb-0" style="font-size: 0.95rem;">
                             "${res.response}"
                         </p>
@@ -53,3 +63,31 @@ async function retrieveAllResponses() {
         responsesList.innerHTML = `<div class="text-danger small p-2">Failed to load responses.</div>`;
     }
 }
+
+async function deleteResponse(responseId) {
+    if (!confirm("Are you sure you want to delete this reply?")) return;
+
+    try {
+        const res = await fetch(`/response/${responseId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            alert(data.message || 'Response deleted successfully.');
+            retrieveAllResponses();
+        } else {
+            alert(data.message || 'Failed to delete your response.');
+        }
+
+    } catch (err) {
+        console.error('Error deleting response:', err);
+        alert("An error occurred while deleting your response.");
+    }
+}
+
+window.deleteResponse = deleteResponse;
