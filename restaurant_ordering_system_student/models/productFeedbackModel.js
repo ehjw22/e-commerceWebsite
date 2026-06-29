@@ -22,10 +22,12 @@ class Feedback {
                 df.product_id,
                 f.member_id as "responder_id",
                 m.username as "responder_username",
-                f.feedback_id as "response_id"
+                f.feedback_id as "response_id",
+                m2.username
             FROM dining_feedback df
             LEFT JOIN feedback f on df.feedback_id = f.dining_feedback_id
             LEFT JOIN member m on m.member_id = f.member_id
+            LEFT JOIN member m2 on m2.member_id = df.member_id
             WHERE df.product_id = $1
             ORDER BY df.last_updated DESC;
         `;
