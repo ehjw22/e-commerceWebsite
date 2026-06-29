@@ -121,7 +121,7 @@ async function fetchProductFeedback() {
 
     // Convert the map back to an array and render the HTML
     feedbackList.innerHTML = Object.values(feedbackMap).map(fb => `
-        <div class="card feedback-card mb-3 w-50">
+        <div class="card feedback-card mb-3 w-100" style="max-width: 650px;">
         <div class="card-body">
 
             <div class="d-flex justify-content-between align-items-start">
