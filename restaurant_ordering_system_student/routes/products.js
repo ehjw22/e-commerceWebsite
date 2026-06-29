@@ -28,6 +28,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/memberOrder', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        p.product_id,
+        p.name,
+        so.order_date,
+        so.member_id
+      FROM sale_order so
+      JOIN sale_order_item soi on soi.order_id = so.order_id
+      JOIN product p on soi.product_id = p.product_id
+      WHERE so.member_id = $1;
+    `;
+
+    const id = req.session.userId;
+
+    const result = await db.query(query, [id]);
+
+    res.json({
+      success: true,
+      products: result.rows
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve product order'
+    });
+  }
+})
+
 // GET /products/:id - retrieve a single product by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -62,7 +93,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /products/buy - buy products
+// POST /products/purchase - buy products
 router.post('/purchase', async (req, res) => {
   const client = await db.connect();
 
