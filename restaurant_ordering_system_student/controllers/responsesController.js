@@ -6,7 +6,7 @@ class ResponseController {
     static async getUserResponses(req, res) {
         try {
             const userId = req.session.userId;
-            const rows = await Response.findByUserId(userId);
+            const rows = await Response.get(userId);
 
             res.json({
                 success: true,
