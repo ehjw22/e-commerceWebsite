@@ -77,7 +77,7 @@ async function fetchProductFeedback() {
     
     const userIdRes = await fetch('/auth/status');
     const userIdData = await userIdRes.json();
-    
+    console.error(data)
     let userId = ''
 
     if (userIdData.authenticated) {
@@ -104,6 +104,7 @@ async function fetchProductFeedback() {
                 last_updated: row.last_updated,
                 member_id: row.member_id,
                 product_id: row.product_id,
+                username: row.username,
                 replies: [] // Array to collect all responses
             };
         }
@@ -123,15 +124,24 @@ async function fetchProductFeedback() {
         <div class="card feedback-card mb-3 w-50">
         <div class="card-body">
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>${createStarRating(fb.ratings)}</div>
-            <small class="text-muted">
-                ${formatDate(fb.last_updated)}
-            </small>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <!-- Username with emphasis -->
+                    <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.95rem;">
+                        @${fb.username || 'unknown_user'} 
+                        ${Number(fb.member_id) === Number(userId) ? '<span class="badge text-muted bg-light border fw-normal ms-1" style="font-size: 0.75rem;">You</span>' : ''}
+                    </span>
+                    <!-- Star Ratings nested cleanly below name -->
+                    <div class="d-flex align-items-center">${createStarRating(fb.ratings)}</div>
+                </div>
+                <!-- Crisp timestamp off to the right -->
+                <small class="text-end bg-light px-2 pt-1 rounded" style="font-size: 0.8rem;">
+                    ${formatDate(fb.last_updated)}
+                </small>
             </div>
 
-            <p class="mb-3" id="comment-${fb.feedback_id}">
-            ${fb.comments || 'No comment provided.'}
+            <p class="text-dark mb-3 lh-base" id="comment-${fb.feedback_id}" style="font-size: 0.95rem;">
+                ${fb.comments || '<em>No comment provided.</em>'}
             </p>
 
             ${Number(fb.member_id) === Number(userId) ? `
