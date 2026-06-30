@@ -235,6 +235,7 @@ async function submitFeedback() {
     document.getElementById('rating-value').innerText = 3;
 
     // refresh list
+    alert('Feedback Successfully Created')
     fetchProductFeedback();
 
     } catch (err) {
@@ -243,7 +244,8 @@ async function submitFeedback() {
 }
 
 async function deleteFeedback(feedbackId) {
-    console.log(feedbackId)
+    if (!confirm("Are you sure you want to delete this feedback?")) return;
+
     try {
     const response = await fetch(`/feedback/${feedbackId}`, {
         method : 'Delete',
@@ -364,6 +366,8 @@ async function createResponse(feedbackId) {
 }
 
 async function deleteResponse(responseId) {
+    if (!confirm("Are you sure you want to delete this response?")) return;
+
     try {
     const res = await fetch(`/response/${responseId}`, {
         method: 'DELETE',
