@@ -3,6 +3,7 @@ import {formatDate, createStarRating} from '../../js/utilities.js';
 document.addEventListener("DOMContentLoaded", retrieveAllFeedback);
 
 window.handleEdit = handleEdit;
+window.deleteFeedback = deleteFeedback;
 
 async function retrieveAllFeedback() {
     try {
@@ -54,7 +55,7 @@ async function retrieveAllFeedback() {
                         <button class="btn btn-sm btn-outline-primary edit-btn" onclick="handleEdit(${feedback.feedback_id})">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-outline-danger delete-btn">
+                        <button class="btn btn-sm btn-outline-danger delete-btn" onclick="deleteFeedback(${feedback.feedback_id})">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -73,4 +74,29 @@ async function retrieveAllFeedback() {
 
 function handleEdit(feedbackId) {
     window.location.href = `/member/feedback/edit?id=${feedbackId}`;
+}
+
+async function deleteFeedback(feedbackId) {
+    if (!confirm("Are you sure you want to delete this feedback?")) return;
+
+    try {
+    const response = await fetch(`/feedback/${feedbackId}`, {
+        method : 'Delete',
+        headers : {
+        'Content-Type' : 'application/json' 
+        }
+    }) 
+
+    const data = await response.json();
+
+    if (!data.success) {
+        alert(data.message);
+    } else {
+        alert(data.message);
+    }
+    retrieveAllFeedback()
+
+    } catch (err) {
+    console.error('Error deleting feedback:', err);
+    }
 }
