@@ -20,6 +20,7 @@ function loadDashboardData() {
                 updateUserWelcome(data.user);
             } else {
                 console.error('Error loading dashboard data:', data.message);
+                displayErrorMessage(data.message);
             }
         })
         .catch(error => {
@@ -137,3 +138,18 @@ function updateUserWelcome(user) {
 window.addEventListener('popstate', function() {
     loadDashboardData();
 });
+
+function displayErrorMessage(message) {
+    document.getElementById('orders-table-container').style.display = 'none';
+    const title = document.getElementById('order-summary-title');
+    
+    title.textContent = `Order Summary (0 orders)`;
+
+    const noOrders = document.getElementById('no-orders');
+    noOrders.style.display = 'block';
+    noOrders.innerHTML = `
+        <div class="alert alert-warning mb-0">
+            ${message}
+        </div>
+    `;
+}
