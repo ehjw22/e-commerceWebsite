@@ -211,6 +211,8 @@ async function submitFeedback() {
 
         const ratings = document.getElementById('rating-input').value;
         const comments = document.getElementById('comment-input').value;
+        
+        if (!comments.trim()) {return alert("Feedback cannot be empty.")}
 
         const res = await fetch('/feedback', {
             method: 'POST',
