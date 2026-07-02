@@ -1,13 +1,17 @@
 document.addEventListener('DOMContentLoaded', retrieveAllResponses);
 
+// Fetches all responses submitted by the user and dynamically renders them into the UI
 async function retrieveAllResponses() {
     const responsesList = document.getElementById('responsesList');
+
     try {
+        // Fetch response data from the API endpoint
         const response = await fetch('/response'); 
         const data = await response.json();
 
-        const responseItems = data.rows || data;
+        const responseItems = data.rows;
 
+        // Render empty state UI if no responses are returned
         if (!responseItems || responseItems.length === 0) {
             responsesList.innerHTML = `
             <div class="card border-0 shadow-sm">
@@ -19,6 +23,7 @@ async function retrieveAllResponses() {
             return;
         }
 
+        // Loop through response items and generate the HTML template cards
         responsesList.innerHTML = responseItems.map(res => {
             const responseId = res.feedback_id;
             return `
@@ -56,7 +61,7 @@ async function retrieveAllResponses() {
                 </div>
             </div>
             `;
-        }).join('');
+        }).join(''); // Join array into a single HTML string
 
     } catch (error) {
         console.error('Error fetching responses:', error);
@@ -65,9 +70,11 @@ async function retrieveAllResponses() {
 }
 
 async function deleteResponse(responseId) {
+    // Prompt confirmation dialogue
     if (!confirm("Are you sure you want to delete this reply?")) return;
 
     try {
+        // Send DELETE request to the backend route
         const res = await fetch(`/response/${responseId}`, {
             method: 'DELETE',
             headers: {
@@ -77,6 +84,7 @@ async function deleteResponse(responseId) {
 
         const data = await res.json();
 
+        // Refresh list if successful, otherwise alert user of server-side failure
         if (data.success) {
             alert(data.message || 'Response deleted successfully.');
             retrieveAllResponses();

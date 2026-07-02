@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Fallback if no ID is provided in the URL
     if (!feedbackId) {
         alert("No feedback ID provided.");
-        window.location.href = "index.html";
+        window.location.href = "/member/feedback";
         return;
     }
 
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         const feedback = data.rows[0]; 
-        console.error(feedback)
+        
         // 3. Pre-fill the form fields with existing data
         document.getElementById('feedbackId').value = feedbackId;
         document.getElementById('productName').value = feedback.name || 'Unknown Product';

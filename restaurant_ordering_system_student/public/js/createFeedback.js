@@ -24,11 +24,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const option = document.createElement('option');
             option.value = item.product_id; 
             
-            // Check which date property your backend returns (order_date or purchase_date)
-            const rawDate = item.order_date || item.purchase_date;
-            
-            // Format it using your custom utility function if available, or fall back to text
-            const purchaseDateText = rawDate ? ` (Bought on ${formatDate(rawDate)})` : '';
+            const rawDate = item.order_date;
+            const purchaseDateText = ` (Bought on ${formatDate(rawDate)})`;
 
             // Combines them nicely: "Burger (Bought on 15 Jun 2026)"
             option.textContent = `${item.name}${purchaseDateText}`;

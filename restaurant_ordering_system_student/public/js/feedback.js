@@ -1,3 +1,4 @@
+// Import utility helper functions for formatting data and rendering stars
 import {formatDate, createStarRating} from '../../js/utilities.js';
 
 document.addEventListener("DOMContentLoaded", retrieveAllFeedback);
@@ -5,15 +6,16 @@ document.addEventListener("DOMContentLoaded", retrieveAllFeedback);
 window.handleEdit = handleEdit;
 window.deleteFeedback = deleteFeedback;
 
+// Fetches all feedback items and dynamically renders them into the UI container
 async function retrieveAllFeedback() {
     try {
+        // Fetch feedback data from the API endpoint
         const response = await fetch('/feedback');
-
         const data = await response.json();
 
         const feedbackList = document.getElementById('feedbackList');
 
-        // No feedback
+        // Render empty state UI if no feedback items exist or are returned
         if (!data || data.rows === 0) {
             feedbackList.innerHTML = `
             <div class="no-feedback">
@@ -24,7 +26,7 @@ async function retrieveAllFeedback() {
             return;
         }
         
-        // Generate feedback cards
+        // Loop through feedback records and generate HTML template cards
         feedbackList.innerHTML = data.rows.map(feedback => {
             const rating = feedback.ratings || 0;
 
@@ -64,7 +66,7 @@ async function retrieveAllFeedback() {
                 
             </div>
             `;
-        }).join('');
+        }).join(''); // Join array into a single HTML string
 
     } catch (error) {
         console.error('Error fetching dining feedback:', error);
@@ -72,31 +74,39 @@ async function retrieveAllFeedback() {
     }
 }
 
+// Redirects the user to the feedback modification page with the specific ID query parameters
 function handleEdit(feedbackId) {
     window.location.href = `/member/feedback/edit?id=${feedbackId}`;
 }
 
+// Sends a DELETE request to the backend server to completely remove a feedback record
 async function deleteFeedback(feedbackId) {
+    // Prompt confirmation dialogue
     if (!confirm("Are you sure you want to delete this feedback?")) return;
 
     try {
-    const response = await fetch(`/feedback/${feedbackId}`, {
-        method : 'Delete',
-        headers : {
-        'Content-Type' : 'application/json' 
+        // Send the DELETE request to the backend route
+        const response = await fetch(`/feedback/${feedbackId}`, {
+            method : 'Delete',
+            headers : {
+                'Content-Type' : 'application/json' 
+            }
+        }) 
+
+        const data = await response.json();
+
+        // Alert user of the server response message regardless of success or failure state
+        if (!data.success) {
+            alert(data.message);
+        } else {
+            alert(data.message);
         }
-    }) 
 
-    const data = await response.json();
-
-    if (!data.success) {
-        alert(data.message);
-    } else {
-        alert(data.message);
-    }
-    retrieveAllFeedback()
+        // Refresh the main feedback display list to reflect changes
+        retrieveAllFeedback()
 
     } catch (err) {
-    console.error('Error deleting feedback:', err);
+        console.error('Error deleting feedback:', err);
+        alert('Failed to delete dining feedback.');
     }
 }

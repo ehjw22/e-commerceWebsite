@@ -20,226 +20,227 @@ async function fetchProductDetail() {
 
     // If no product ID is present in the URL, show error immediately
     if (!productId) {
-    loading.style.display = 'none';
-    errorMessage.style.display = 'block';
-    errorMessage.textContent = 'No product specified.';
-    return;
-    }
-
-    try {
-    const response = await fetch(`/products/${productId}`);
-    const data = await response.json();
-
-    loading.style.display = 'none';
-
-    if (!data.success || !data.product) {
+        loading.style.display = 'none';
         errorMessage.style.display = 'block';
+        errorMessage.textContent = 'No product specified.';
         return;
     }
 
-    const product = data.product;
+    try {
+        const response = await fetch(`/products/${productId}`);
+        const data = await response.json();
 
-    document.title = `${product.name} - Member View`;
-    document.getElementById('detail-name').textContent = product.name;
-    document.getElementById('detail-category').textContent = product.category || '-';
-    document.getElementById('detail-description').textContent = product.description || '-';
-    document.getElementById('detail-price').textContent = `$${parseFloat(product.price).toFixed(2)}`;
-    document.getElementById('detail-created-at').textContent = new Date(product.created_at).toLocaleDateString();
+        loading.style.display = 'none';
 
-    // Render availability badge, consistent with products.html
-    const statusCell = document.getElementById('detail-status');
-    statusCell.innerHTML = `
-        <span class="badge ${product.is_available ? 'bg-success' : 'bg-secondary'}">
-        ${product.is_available ? 'Available' : 'Unavailable'}
-        </span>
-    `;
+        if (!data.success || !data.product) {
+            errorMessage.style.display = 'block';
+            return;
+        }
 
-    productDetail.style.display = 'block';
+        const product = data.product;
+
+        document.title = `${product.name} - Member View`;
+        document.getElementById('detail-name').textContent = product.name;
+        document.getElementById('detail-category').textContent = product.category || '-';
+        document.getElementById('detail-description').textContent = product.description || '-';
+        document.getElementById('detail-price').textContent = `$${parseFloat(product.price).toFixed(2)}`;
+        document.getElementById('detail-created-at').textContent = new Date(product.created_at).toLocaleDateString();
+
+        // Render availability badge, consistent with products.html
+        const statusCell = document.getElementById('detail-status');
+        statusCell.innerHTML = `
+            <span class="badge ${product.is_available ? 'bg-success' : 'bg-secondary'}">
+            ${product.is_available ? 'Available' : 'Unavailable'}
+            </span>
+        `;
+
+        productDetail.style.display = 'block';
 
     } catch (error) {
-    console.error('Error fetching product detail:', error);
-    loading.style.display = 'none';
-    errorMessage.style.display = 'block';
+        console.error('Error fetching product detail:', error);
+        loading.style.display = 'none';
+        errorMessage.style.display = 'block';
     }
 }
 
 async function fetchProductFeedback() {
     try {
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('id');
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get('id');
 
-    const res = await fetch(`/feedback/product/${productId}`);
-    const data = await res.json();
+        const res = await fetch(`/feedback/product/${productId}`);
+        const data = await res.json();
 
-    const feedbackSection = document.getElementById('feedback-section');
-    const feedbackList = document.getElementById('feedback-list');
-    const noFeedback = document.getElementById('no-feedback');
-    
-    const userIdRes = await fetch('/auth/status');
-    const userIdData = await userIdRes.json();
-    console.error(data)
-    let userId = ''
+        const feedbackSection = document.getElementById('feedback-section');
+        const feedbackList = document.getElementById('feedback-list');
+        const noFeedback = document.getElementById('no-feedback');
+        
+        const userIdRes = await fetch('/auth/status');
+        const userIdData = await userIdRes.json();
 
-    if (userIdData.authenticated) {
-        userId = userIdData.user.id
-    }
+        let userId = ''
 
-    if (data.success === false || data.message === "No feedback found") {
-        noFeedback.style.display = 'block';
-        feedbackSection.style.display = 'none';
-        return;
-    }
-
-    feedbackSection.style.display = 'block';
-    noFeedback.style.display = 'none';
-    // Group the flat database rows into a structured object
-    const feedbackMap = {};
-
-    data.rows.forEach(row => {
-        if (!feedbackMap[row.feedback_id]) {
-            feedbackMap[row.feedback_id] = {
-                feedback_id: row.feedback_id,
-                comments: row.comments,
-                ratings: row.ratings,
-                last_updated: row.last_updated,
-                member_id: row.member_id,
-                product_id: row.product_id,
-                username: row.username,
-                replies: [] // Array to collect all responses
-            };
+        if (userIdData.authenticated) {
+            userId = userIdData.user.id
         }
-        // If a response exists for this row, push it to the replies array
-        if (row.responses) {
-            feedbackMap[row.feedback_id].replies.push({
-                text: row.responses,
-                responder_id: row.responder_id,
-                username: row.responder_username,
-                response_id: row.response_id
-            });
+
+        if (data.success === false || data.message === "No feedback found") {
+            noFeedback.style.display = 'block';
+            feedbackSection.style.display = 'none';
+            return;
         }
-    });
 
-    // Convert the map back to an array and render the HTML
-    feedbackList.innerHTML = Object.values(feedbackMap).map(fb => `
-        <div class="card feedback-card mb-3 w-100" style="max-width: 650px;">
-        <div class="card-body">
+        feedbackSection.style.display = 'block';
+        noFeedback.style.display = 'none';
+        // Group the flat database rows into a structured object
+        const feedbackMap = {};
 
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <!-- Username with emphasis -->
-                    <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.95rem;">
-                        @${fb.username || 'unknown_user'} 
-                        ${Number(fb.member_id) === Number(userId) ? '<span class="badge text-muted bg-light border fw-normal ms-1" style="font-size: 0.75rem;">You</span>' : ''}
-                    </span>
-                    <!-- Star Ratings nested cleanly below name -->
-                    <div class="d-flex align-items-center">${createStarRating(fb.ratings)}</div>
-                </div>
-                <!-- Crisp timestamp off to the right -->
-                <small class="text-end bg-light px-2 pt-1 rounded" style="font-size: 0.8rem;">
-                    ${formatDate(fb.last_updated)}
-                </small>
-            </div>
+        data.rows.forEach(row => {
+            if (!feedbackMap[row.feedback_id]) {
+                feedbackMap[row.feedback_id] = {
+                    feedback_id: row.feedback_id,
+                    comments: row.comments,
+                    ratings: row.ratings,
+                    last_updated: row.last_updated,
+                    member_id: row.member_id,
+                    product_id: row.product_id,
+                    username: row.username,
+                    replies: [] // Array to collect all responses
+                };
+            }
+            // If a response exists for this row, push it to the replies array
+            if (row.responses) {
+                feedbackMap[row.feedback_id].replies.push({
+                    text: row.responses,
+                    responder_id: row.responder_id,
+                    username: row.responder_username,
+                    response_id: row.response_id
+                });
+            }
+        });
 
-            <p class="text-dark mb-3 lh-base" id="comment-${fb.feedback_id}" style="font-size: 0.95rem;">
-                ${fb.comments || '<em>No comment provided.</em>'}
-            </p>
+        // Convert the map back to an array and render the HTML
+        feedbackList.innerHTML = Object.values(feedbackMap).map(fb => `
+            <div class="card feedback-card mb-3 w-100" style="max-width: 650px;">
+                <div class="card-body">
 
-            ${Number(fb.member_id) === Number(userId) ? `
-            <div class="d-flex gap-2 mb-3">
-                <button class="btn btn-sm btn-outline-primary"
-                onclick="editFeedback(${fb.feedback_id}, ${fb.ratings}, \'${fb.comments}\')">
-                <i class="bi bi-pencil"></i> Edit
-                </button>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <!-- Username with emphasis -->
+                            <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.95rem;">
+                                @${fb.username || 'unknown_user'} 
+                                ${Number(fb.member_id) === Number(userId) ? '<span class="badge text-muted bg-light border fw-normal ms-1" style="font-size: 0.75rem;">You</span>' : ''}
+                            </span>
+                            <!-- Star Ratings nested cleanly below name -->
+                            <div class="d-flex align-items-center">${createStarRating(fb.ratings)}</div>
+                        </div>
+                        <!-- Crisp timestamp off to the right -->
+                        <small class="text-end bg-light px-2 pt-1 rounded" style="font-size: 0.8rem;">
+                            ${formatDate(fb.last_updated)}
+                        </small>
+                    </div>
 
-                <button class="btn btn-sm btn-outline-danger"
-                onclick="deleteFeedback(${fb.feedback_id})">
-                <i class="bi bi-trash"></i> Delete
-                </button>
-            </div>
-            ` : ''}
+                    <p class="text-dark mb-3 lh-base" id="comment-${fb.feedback_id}" style="font-size: 0.95rem;">
+                        ${fb.comments || '<em>No comment provided.</em>'}
+                    </p>
 
-            <div class="responses-container mb-3 ps-3 border-start">
-            ${fb.replies.length > 0 ? fb.replies.map(reply => `
-                <div class="reply-item p-2 mb-2 bg-light rounded" style="font-size: 0.9rem;">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="text-primary" style="font-size: 0.85rem;">
-                    @${reply.username || 'unknown_user'} 
-                    ${Number(reply.responder_id) === Number(userId) ? '<span class="text-muted fw-normal">(You)</span>' : ''}
-                    </strong>
-                    
-                    ${Number(reply.responder_id) === Number(userId) ? `
-                    <button 
-                        class="btn btn-link text-danger p-0 m-0 style="font-size: 0.8rem; text-decoration: none;" 
-                        onclick="deleteResponse(${reply.response_id})">
-                        Delete
-                    </button>
+                    ${Number(fb.member_id) === Number(userId) ? `
+                    <div class="d-flex gap-2 mb-3">
+                        <button class="btn btn-sm btn-outline-primary"
+                        onclick="editFeedback(${fb.feedback_id}, ${fb.ratings}, \'${fb.comments}\')">
+                        <i class="bi bi-pencil"></i> Edit
+                        </button>
+
+                        <button class="btn btn-sm btn-outline-danger"
+                        onclick="deleteFeedback(${fb.feedback_id})">
+                        <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
                     ` : ''}
+
+                    <div class="responses-container mb-3 ps-3 border-start">
+                    ${fb.replies.length > 0 ? fb.replies.map(reply => `
+                        <div class="reply-item p-2 mb-2 bg-light rounded" style="font-size: 0.9rem;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-primary" style="font-size: 0.85rem;">
+                            @${reply.username || 'unknown_user'} 
+                            ${Number(reply.responder_id) === Number(userId) ? '<span class="text-muted fw-normal">(You)</span>' : ''}
+                            </strong>
+                            
+                            ${Number(reply.responder_id) === Number(userId) ? `
+                            <button 
+                                class="btn btn-link text-danger p-0 m-0 style="font-size: 0.8rem; text-decoration: none;" 
+                                onclick="deleteResponse(${reply.response_id})">
+                                Delete
+                            </button>
+                            ` : ''}
+                        </div>
+                        <p class="mb-0 text-dark">${reply.text}</p>
+                        </div>
+                    `).join('') : '<small class="text-muted d-block mb-2">No responses yet.</small>'}
+                    </div>
+
+                    ${Number(fb.member_id) !== Number(userId) ? `
+                    <div class="d-flex gap-2 align-items-center">
+                    <input 
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Write a response..."
+                        id="reply-input-${fb.feedback_id}"
+                    />
+
+                    <button 
+                        class="btn btn-sm btn-primary"
+                        onclick="createResponse(${fb.feedback_id})">
+                        Post
+                    </button>
+                    </div>` : ``}
+
                 </div>
-                <p class="mb-0 text-dark">${reply.text}</p>
-                </div>
-            `).join('') : '<small class="text-muted d-block mb-2">No responses yet.</small>'}
             </div>
+        `).join('');
 
-            ${Number(fb.member_id) !== Number(userId) ? `
-            <div class="d-flex gap-2 align-items-center">
-            <input 
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Write a response..."
-                id="reply-input-${fb.feedback_id}"
-            />
-
-            <button 
-                class="btn btn-sm btn-primary"
-                onclick="createResponse(${fb.feedback_id})">
-                Post
-            </button>
-            </div>` : ``}
-
-        </div>
-        </div>
-    `).join('');
     } catch (err) {
-    console.error('Error loading feedback:', err);
+        console.error('Error loading feedback:', err);
     }
 }
 
 async function submitFeedback() {
     try {
-    const productId = new URLSearchParams(window.location.search).get('id');
+        const productId = new URLSearchParams(window.location.search).get('id');
 
-    const ratings = document.getElementById('rating-input').value;
-    const comments = document.getElementById('comment-input').value;
+        const ratings = document.getElementById('rating-input').value;
+        const comments = document.getElementById('comment-input').value;
 
-    const res = await fetch('/feedback', {
-        method: 'POST',
-        headers: {
-        'Content-Type':'application/json'
-        },
-        body: JSON.stringify({
-        product_id: productId,
-        ratings: Number(ratings),
-        feedback: comments
-        })
-    });
+        const res = await fetch('/feedback', {
+            method: 'POST',
+            headers: {
+            'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+            product_id: productId,
+            ratings: Number(ratings),
+            feedback: comments
+            })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (!data.success) {
-        alert(data.message || 'Failed to submit feedback');
-        return;
-    }
+        if (!data.success) {
+            alert(data.message || 'Failed to submit feedback');
+            return;
+        }
 
-    document.getElementById('comment-input').value = '';
-    document.getElementById('rating-input').value = 3;
-    document.getElementById('rating-value').innerText = 3;
+        document.getElementById('comment-input').value = '';
+        document.getElementById('rating-input').value = 3;
+        document.getElementById('rating-value').innerText = 3;
 
-    // refresh list
-    alert('Feedback Successfully Created')
-    fetchProductFeedback();
+        // refresh list
+        alert('Feedback Successfully Created')
+        fetchProductFeedback();
 
     } catch (err) {
-    console.error('Error creating feedback:', err);
+        console.error('Error creating feedback:', err);
     }
 }
 
@@ -247,29 +248,29 @@ async function deleteFeedback(feedbackId) {
     if (!confirm("Are you sure you want to delete this feedback?")) return;
 
     try {
-    const response = await fetch(`/feedback/${feedbackId}`, {
-        method : 'Delete',
-        headers : {
-        'Content-Type' : 'application/json' 
+        const response = await fetch(`/feedback/${feedbackId}`, {
+            method : 'Delete',
+            headers : {
+            'Content-Type' : 'application/json' 
+            }
+        }) 
+
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.message);
+        } else {
+            alert(data.message);
         }
-    }) 
 
-    const data = await response.json();
-
-    if (!data.success) {
-        alert(data.message);
-    } else {
-        alert(data.message);
-    }
-    fetchProductFeedback()
+        fetchProductFeedback()
 
     } catch (err) {
-    console.error('Error deleting feedback:', err);
+        console.error('Error deleting feedback:', err);
     }
 }
 
 function editFeedback(feedbackId, rating, comment) {
-    console.log(feedbackId, rating, comment)
     document.getElementById('edit-feedback-id').value = feedbackId;
 
     document.getElementById('edit-rating').value = rating;
@@ -278,7 +279,7 @@ function editFeedback(feedbackId, rating, comment) {
     document.getElementById('edit-comment').value = comment;
 
     const modal = new bootstrap.Modal(
-    document.getElementById('editFeedbackModal')
+        document.getElementById('editFeedbackModal')
     );
 
     modal.show();
@@ -286,82 +287,76 @@ function editFeedback(feedbackId, rating, comment) {
 
 async function saveFeedback() {
     try {
+        const feedbackId = document.getElementById('edit-feedback-id').value;
 
-    const feedbackId =
-        document.getElementById('edit-feedback-id').value;
+        const rating = document.getElementById('edit-rating').value;
 
-    const rating =
-        document.getElementById('edit-rating').value;
+        const comment = document.getElementById('edit-comment').value;
 
-    const comment =
-        document.getElementById('edit-comment').value;
+        const response = await fetch(`/feedback/${feedbackId}`, {
+            method: 'PUT',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            ratings: rating,
+            comments: comment
+            })
+        });
 
-    const response = await fetch(`/feedback/${feedbackId}`, {
-        method: 'PUT',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-        ratings: rating,
-        comments: comment
-        })
-    });
+        const data = await response.json();
 
-    const data = await response.json();
+        if (!data.success) {
+            alert(data.message);
+            return;
+        }
 
-    if (!data.success) {
-        alert(data.message);
-        return;
-    }
+        bootstrap.Modal.getInstance(document.getElementById('editFeedbackModal')).hide();
 
-    bootstrap.Modal.getInstance(
-        document.getElementById('editFeedbackModal')
-    ).hide();
-
-    alert('Feedback has been updated');
-    
-    fetchProductFeedback();
+        alert('Feedback has been updated');
+        
+        fetchProductFeedback();
 
     } catch (err) {
-    console.error(err);
-    alert('Failed to update feedback');
+        console.error(err);
+        alert('Failed to update feedback');
     }
 }
 
 async function createResponse(feedbackId) {
     try {
-    const inputElement = document.getElementById(`reply-input-${feedbackId}`);
-    const responseText = inputElement.value.trim();
+        const inputElement = document.getElementById(`reply-input-${feedbackId}`);
+        const responseText = inputElement.value.trim();
 
-    if (!responseText) {
-        alert("Please write something before posting!");
-        return;
-    }
+        if (!responseText) {
+            alert("Please write something before posting!");
+            return;
+        }
 
-    const res = await fetch(`/response/${feedbackId}`, {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-        response: responseText
-        })
-    });
+        const res = await fetch(`/response/${feedbackId}`, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            response: responseText
+            })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (data.success) {
-        inputElement.value = '';
-        
-        alert(data.message);
-        fetchProductFeedback();
-    } else {
-        alert(data.message || "Failed to submit response.");
-    }
+        if (data.success) {
+            inputElement.value = '';
+            
+            alert(data.message);
+            fetchProductFeedback();
+        } else {
+            alert(data.message || "Failed to submit response.");
+        }
 
     } catch (err) {
-    console.error('Error creating response:', err);
-    alert("An error occurred while posting your response.");
+        console.error('Error creating response:', err);
+        alert("An error occurred while posting your response.");
     }
 }
 
@@ -369,22 +364,22 @@ async function deleteResponse(responseId) {
     if (!confirm("Are you sure you want to delete this response?")) return;
 
     try {
-    const res = await fetch(`/response/${responseId}`, {
-        method: 'DELETE',
-        headers: {
-        'Content-Type': 'application/json'
-        }
-    });
+        const res = await fetch(`/response/${responseId}`, {
+            method: 'DELETE',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (data.success) {
-        alert(data.message);
-        fetchProductFeedback();
-    } 
+        if (data.success) {
+            alert(data.message);
+            fetchProductFeedback();
+        } 
 
     } catch (err) {
-    console.error('Error deleting response:', err);
-    alert("An error occurred while deleting your response.");
+        console.error('Error deleting response:', err);
+        alert("An error occurred while deleting your response.");
     }
 }
