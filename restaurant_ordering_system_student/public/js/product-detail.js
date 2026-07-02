@@ -217,12 +217,12 @@ async function submitFeedback() {
         const res = await fetch('/feedback', {
             method: 'POST',
             headers: {
-            'Content-Type':'application/json'
+                'Content-Type':'application/json'
             },
             body: JSON.stringify({
-            product_id: productId,
-            ratings: Number(ratings),
-            feedback: comments
+                product_id: productId,
+                ratings: Number(ratings),
+                feedback: comments
             })
         });
 
