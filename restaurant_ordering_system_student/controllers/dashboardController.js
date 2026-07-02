@@ -25,6 +25,14 @@ class DashboardController {
             });
         } catch (error) {
             console.error('Error loading dashboard:', error);
+
+            if (error.code === 'P0002') {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
             res.status(500).send('Server error');
         }
     }
