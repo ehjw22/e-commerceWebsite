@@ -1,5 +1,13 @@
 export function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString();
+  return new Date(dateString).toLocaleString("en-US", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
 }
 
 export function createStarRating(rating) {
