@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict 5fKPD8jDxIhe6PS6a43NgUJ5lvdXZsc3OBd2DuhAMXIkJ3xG6CwBy4r2vSx9XHY
+\restrict XWODW9jWLHXtcf0e6iJVUdE7cT4ZnU7lspBovgbcvwVqDLeD9iszoORSK1fUxr7
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
 
--- Started on 2026-06-29 15:56:14
+-- Started on 2026-07-03 15:24:26
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -32,6 +32,25 @@ CREATE PROCEDURE public.create_feedback(IN u_feedback text, IN u_ratings integer
 DECLARE
 	u_order_id INT;
 BEGIN
+	-- Validation: Verify feedback is not null
+	IF u_feedback IS NULL OR LENGTH(TRIM(u_feedback)) = 0 THEN
+	    RAISE EXCEPTION 'Feedback cannot be empty.';
+	END IF;
+
+	-- Validation: Verify ratings is not null
+	IF u_ratings IS NULL THEN
+	    RAISE EXCEPTION 'Rating is required.';
+	END IF;
+
+	-- Validation: Verify product_id is not null
+	IF u_product_id IS NULL THEN
+		RAISE EXCEPTION 'Product_id is required';
+	END IF;
+
+	-- Validation: Verify member_id is not null
+	IF u_member_id IS NULL THEN
+		RAISE EXCEPTION 'Member_id is required';
+	END IF;
 	SELECT so.member_id
 	INTO u_order_id
 	FROM sale_order_item soi
@@ -47,21 +66,12 @@ BEGIN
 	-- Insert the specified feedback record
 	INSERT INTO dining_feedback (product_id, member_id, comments, ratings, last_updated)
 	VALUES (u_product_id, u_member_id, u_feedback, u_ratings, NOW());
-	
-EXCEPTION
-	WHEN raise_exception THEN
-		RAISE NOTICE 'Validation failed: %', SQLERRM;
-		RAISE; 
-
-	WHEN OTHERS THEN
-		RAISE NOTICE 'An unexpected database error occurred: %', SQLERRM;
-		RAISE EXCEPTION 'Database execution failed. Please check your inputs.';
 END;
 $$;
 
 
 --
--- TOC entry 246 (class 1255 OID 41910)
+-- TOC entry 247 (class 1255 OID 41910)
 -- Name: create_response(text, integer, integer); Type: PROCEDURE; Schema: public; Owner: -
 --
 
@@ -71,6 +81,21 @@ CREATE PROCEDURE public.create_response(IN u_response text, IN u_member_id integ
 DECLARE
     v_original_member_id INT;
 BEGIN
+	-- Validation: Verify response is not null
+	IF u_response IS NULL THEN
+		RAISE EXCEPTION 'Response is required';
+	END IF;
+
+	-- Validation: Verify member_id is not null
+	IF u_member_id IS NULL THEN
+		RAISE EXCEPTION 'Member_id is required';
+	END IF;
+
+	-- Validation: Verify dining_feedback_id is not null
+	IF u_dining_feedback_id IS NULL THEN
+		RAISE EXCEPTION 'Feedback_id is required';
+	END IF;
+	
     SELECT member_id INTO v_original_member_id
     FROM dining_feedback 
     WHERE feedback_id = u_dining_feedback_id;
@@ -88,21 +113,12 @@ BEGIN
     -- Insert the specified response record
     INSERT INTO feedback (dining_feedback_id, member_id, comments)
     VALUES (u_dining_feedback_id, u_member_id, u_response);
-
-EXCEPTION
-    WHEN raise_exception THEN
-        RAISE NOTICE 'Validation failed: %', SQLERRM;
-        RAISE; 
-
-    WHEN OTHERS THEN
-        RAISE NOTICE 'An unexpected database error occurred: %', SQLERRM;
-        RAISE EXCEPTION 'Database execution failed. Please check your inputs.';
 END;
 $$;
 
 
 --
--- TOC entry 247 (class 1255 OID 41885)
+-- TOC entry 246 (class 1255 OID 41885)
 -- Name: create_response(text, integer, integer, integer); Type: PROCEDURE; Schema: public; Owner: -
 --
 
@@ -158,6 +174,16 @@ CREATE PROCEDURE public.delete_feedback(IN u_feedback_id integer, IN u_member_id
 DECLARE
 	v_member_id INT;
 BEGIN
+	-- Validation: Verify feedback_id is not null
+	IF u_feedback_id IS NULL THEN
+		RAISE EXCEPTION 'feedback_id is required';
+	END IF;
+
+	-- Validation: Verify member_id is not null
+	IF u_member_id IS NULL THEN
+		RAISE EXCEPTION 'member_id is required';
+	END IF;
+
 	SELECT member_id
 	INTO v_member_id
 	FROM dining_feedback
@@ -176,21 +202,12 @@ BEGIN
 	-- Delete the specified feedback record
 	DELETE FROM dining_feedback
 	WHERE feedback_id = u_feedback_id;
-	
-EXCEPTION
-	WHEN raise_exception THEN
-		RAISE NOTICE 'Validation failed: %', SQLERRM;
-		RAISE; 
-
-	WHEN OTHERS THEN
-		RAISE NOTICE 'An unexpected database error occurred: %', SQLERRM;
-		RAISE EXCEPTION 'Database execution failed during deletion.';
 END;
 $$;
 
 
 --
--- TOC entry 251 (class 1255 OID 41909)
+-- TOC entry 250 (class 1255 OID 41909)
 -- Name: delete_response(integer, integer); Type: PROCEDURE; Schema: public; Owner: -
 --
 
@@ -200,6 +217,16 @@ CREATE PROCEDURE public.delete_response(IN u_response_id integer, IN u_member_id
 DECLARE
     v_actual_owner_id INT;
 BEGIN
+	-- Validation: Verify response_id is not null
+	IF u_response_id IS NULL THEN
+		RAISE EXCEPTION 'Response_id is required';
+	END IF;
+
+	-- Validation: Verify member_id is not null
+	IF u_member_id IS NULL THEN
+		RAISE EXCEPTION 'Member_id is required';
+	END IF;
+	
    	-- Validation: Existence check
 	IF NOT EXISTS (
 		SELECT 1 
@@ -226,15 +253,6 @@ BEGIN
     -- Delete the specified response record
     DELETE FROM feedback 
     WHERE feedback_id = u_response_id;
-
-EXCEPTION
-    WHEN raise_exception THEN
-        RAISE NOTICE 'Validation failed: %', SQLERRM;
-        RAISE; 
-
-    WHEN OTHERS THEN
-        RAISE NOTICE 'An unexpected database error occurred: %', SQLERRM;
-        RAISE EXCEPTION 'Database execution failed during deletion.';
 END;
 $$;
 
@@ -271,7 +289,7 @@ $$;
 
 
 --
--- TOC entry 250 (class 1255 OID 41831)
+-- TOC entry 249 (class 1255 OID 41831)
 -- Name: get_feedback(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -279,6 +297,11 @@ CREATE FUNCTION public.get_feedback(u_member_id integer) RETURNS TABLE(comments 
     LANGUAGE plpgsql
     AS $$	
 BEGIN
+	-- Validation: Verify member_id is not null
+	IF u_member_id IS NULL THEN
+		RAISE EXCEPTION 'Member_id is required';
+	END IF;
+	
 	-- Validation: Existence check
 	IF NOT EXISTS (
 		SELECT 1 
@@ -309,21 +332,12 @@ BEGIN
     JOIN product p ON p.product_id = df.product_id
     WHERE df.member_id = u_member_id
     ORDER BY df.product_id ASC, df.last_updated DESC;
-	
-EXCEPTION
-	WHEN raise_exception THEN
-		RAISE NOTICE 'Validation failed: %', SQLERRM;
-		RAISE; 
-
-	WHEN OTHERS THEN
-		RAISE NOTICE 'An unexpected database error occurred: %', SQLERRM;
-		RAISE EXCEPTION 'Database execution failed during data retrieval.';
 END;
 $$;
 
 
 --
--- TOC entry 252 (class 1255 OID 41950)
+-- TOC entry 251 (class 1255 OID 41950)
 -- Name: get_response(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -360,14 +374,12 @@ BEGIN
 	JOIN dining_feedback df on f.dining_feedback_id = df.feedback_id
 	JOIN product p on p.product_id = df.product_id
 	WHERE f.member_id = u_member_id;	
-	
-
 END;
 $$;
 
 
 --
--- TOC entry 249 (class 1255 OID 41914)
+-- TOC entry 248 (class 1255 OID 41914)
 -- Name: get_sale_order_summary(date, date, character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -431,22 +443,12 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'No sales orders found matching the specified criteria.' USING ERRCODE = 'P0002';
     END IF;
-
-EXCEPTION
-    -- Validation block mapping
-    WHEN raise_exception THEN
-        RAISE NOTICE 'Validation failed: %', SQLERRM;
-        RAISE;
-
-    WHEN OTHERS THEN
-        RAISE NOTICE 'An unexpected report rendering error occurred: %', SQLERRM;
-        RAISE EXCEPTION 'Database execution failed to aggregate sale logs.';
 END;
 $_$;
 
 
 --
--- TOC entry 248 (class 1255 OID 41830)
+-- TOC entry 252 (class 1255 OID 41830)
 -- Name: update_feedback(integer, integer, text, integer); Type: PROCEDURE; Schema: public; Owner: -
 --
 
@@ -456,6 +458,26 @@ CREATE PROCEDURE public.update_feedback(IN u_feedback_id integer, IN u_member_id
 DECLARE
 	v_member_id INT;
 BEGIN
+	-- Validation: Verify feedback_id is not null
+	IF u_feedback_id IS NULL THEN
+		RAISE EXCEPTION 'feedback_id is required';
+	END IF;
+
+	-- Validation: Verify feedback_id is not null
+	IF u_member_id IS NULL THEN
+		RAISE EXCEPTION 'feedback_id is required';
+	END IF;
+
+	-- Validation: Verify feedback_id is not null
+	IF new_comment IS NULL THEN
+		RAISE EXCEPTION 'Feedback is required';
+	END IF;
+
+	-- Validation: Verify feedback_id is not null
+	IF new_rating IS NULL THEN
+		RAISE EXCEPTION 'Ratings is required';
+	END IF;
+	
 	SELECT member_id
 	INTO v_member_id
 	FROM dining_feedback
@@ -473,17 +495,8 @@ BEGIN
 	
 	-- Update the specified feedback record
 	UPDATE dining_feedback 
-	SET comments = new_comment, ratings = new_rating
+	SET comments = new_comment, ratings = new_rating, last_updated = NOW()
 	WHERE feedback_id = u_feedback_id;
-	
-EXCEPTION
-	WHEN raise_exception THEN
-		RAISE NOTICE 'Validation failed: %', SQLERRM;
-		RAISE; 
-
-	WHEN OTHERS THEN
-		RAISE NOTICE 'An unexpected database error occurred: %', SQLERRM;
-		RAISE EXCEPTION 'Database execution failed during update.';
 END;
 $$;
 
@@ -932,11 +945,11 @@ ALTER TABLE ONLY public.sale_order
     ADD CONSTRAINT sale_order_member_id_fkey FOREIGN KEY (member_id) REFERENCES public.member(member_id);
 
 
--- Completed on 2026-06-29 15:56:14
+-- Completed on 2026-07-03 15:24:26
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 5fKPD8jDxIhe6PS6a43NgUJ5lvdXZsc3OBd2DuhAMXIkJ3xG6CwBy4r2vSx9XHY
+\unrestrict XWODW9jWLHXtcf0e6iJVUdE7cT4ZnU7lspBovgbcvwVqDLeD9iszoORSK1fUxr7
 
