@@ -294,7 +294,9 @@ async function saveFeedback() {
         const rating = document.getElementById('edit-rating').value;
 
         const comment = document.getElementById('edit-comment').value;
-
+        if (comment.trim().length === 0) {
+            return alert('Feedback cannot be empty')
+        }
         const response = await fetch(`/feedback/${feedbackId}`, {
             method: 'PUT',
             headers: {

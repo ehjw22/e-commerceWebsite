@@ -44,7 +44,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Handle submission of the changes back to database
 document.getElementById('editFeedbackForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    if (document.getElementById('comments').value.trim().length === 0) {
+        return alert('Feedback cannot be empty')
+    }
+
     const feedbackId = document.getElementById('feedbackId').value;
     const updatedData = {
         ratings: document.getElementById('rating').value,
