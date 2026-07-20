@@ -43,6 +43,7 @@ model member {
   feedback       feedback[]
   memberRole     memberRole[]
   saleOrder      saleOrder[]
+  cart           cart[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -65,6 +66,7 @@ model product {
   createdAt      DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
   diningFeedback diningFeedback[]
   saleOrderItem  saleOrderItem[]
+  cartItem       cartItem[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -93,4 +95,50 @@ model saleOrderItem {
   product     product?   @relation(fields: [productId], references: [productId], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("sale_order_item")
+}
+
+model cart {
+  cartId       Int            @id @default(autoincrement()) @map("cart_id")
+  memberId     Int            @unique @map("member_id")
+  createdAt    DateTime?      @default(now()) @map("created_at") @db.Timestamp(6)
+  member       member         @relation(fields: [memberId], references: [memberId], onDelete: Cascade, onUpdate: NoAction)
+  cartDiscount cartDiscount[]
+  cartItem     cartItem[]
+
+  @@map("cart")
+}
+
+model cartItem {
+  cartItemId Int     @id @default(autoincrement()) @map("cart_item_id")
+  cartId     Int     @map("cart_id")
+  productId  Int     @map("product_id")
+  quantity   Int
+  cart       cart    @relation(fields: [cartId], references: [cartId], onDelete: Cascade, onUpdate: NoAction)
+  product    product @relation(fields: [productId], references: [productId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([cartId, productId])
+  @@map("cart_item")
+}
+
+model discount {
+  discountId      Int            @id @default(autoincrement()) @map("discount_id")
+  name            String         @db.VarChar(100)
+  description     String?
+  discountType    String         @map("discount_type") @db.VarChar(50) // one of the following values: "PRODUCT_QUANTITY", "CART_TOTAL", "DELIVERY"
+  minTrigger      Decimal        @map("min_trigger") @db.Decimal(10, 2)// can be used for all three
+  maxTrigger      Decimal?       @map("max_trigger") @db.Decimal(10, 2)
+  value           Decimal        @db.Decimal(10, 2)
+  targetProductId Int?           @map("target_product_id") // for product_quantity
+  isActive        Boolean?       @default(true) @map("is_active")
+  cartDiscount    cartDiscount[]
+}
+
+model cartDiscount {
+  cartId     Int      @map("cart_id")
+  discountId Int      @map("discount_id")
+  cart       cart     @relation(fields: [cartId], references: [cartId], onDelete: Cascade, onUpdate: NoAction)
+  discount   discount @relation(fields: [discountId], references: [discountId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([cartId, discountId])
+  @@map("cart_discount")
 }
