@@ -31,6 +31,8 @@ app.use('/member', require('./routes/productsPage'));
 app.use('/member', require('./routes/feedbackPage'));
 app.use('/feedback', require('./routes/feedback'));
 app.use('/response', require('./routes/responses'));
+app.use('/member', require('./routes/cartPage'));
+app.use('/cart', require('./routes/cart'))
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
