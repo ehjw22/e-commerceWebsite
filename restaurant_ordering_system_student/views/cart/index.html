@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Shopping Cart</title>
+  <!-- Bootstrap 5 CSS for UI formatting -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">Restaurant Ordering System</a>
+
+      <div class="d-flex align-items-center gap-2 ms-auto">
+        <a href="/member/products" class="btn btn-primary btn-sm">
+          Products
+        </a>
+
+        <a href="/member/feedback" class="btn btn-warning btn-sm">
+          Feedback
+        </a>
+
+        <!-- Added Cart Navigation Button -->
+        <a href="/member/cart" class="btn btn-info btn-sm text-white">
+          <i class="bi bi-cart-fill"></i> Cart
+        </a>
+
+        <span class="navbar-text ms-2 me-2">
+          Welcome, Member
+        </span>
+
+        <a href="/logout" class="btn btn-outline-light btn-sm">
+          Logout
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <div class="container my-5">
+    <h2 class="mb-4"><i class="bi bi-basket3"></i> Your Shopping Cart</h2>
+
+    <!-- Dynamic Feedback Alert Component for Back-end Error/Success Messages -->
+    <div id="alert-box" class="alert d-none" role="alert"></div>
+
+    <div class="row">
+      <!-- Cart Items List Layout (Left Column) -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <div id="cart-items-container">
+              <!-- Loading Spinner Placeholder -->
+              <div class="text-center py-4">
+                <div class="spinner-border text-secondary" role="status">
+                  <span class="visually-hidden">Loading your items...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary Card Layout (Right Column) -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">Order Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Items Total:</span>
+              <span id="summary-subtotal">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 text-muted small">
+              <span>Estimated Delivery Fee:</span>
+              <span id="summary-delivery">Calculated at summary</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-4">
+              <strong class="h5">Total Amount:</strong>
+              <strong class="h5 text-success" id="summary-total">$0.00</strong>
+            </div>
+            <button class="btn btn-success w-100 py-2 fw-bold" id="checkout-btn" disabled>
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Bootstrap Javascript Bundle Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
