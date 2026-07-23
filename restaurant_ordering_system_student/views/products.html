@@ -51,6 +51,7 @@
                 <th>Status</th>
                 <th>Created At</th>
                 <th>Details</th>
+                <th>Purchase</th>
               </tr>
             </thead>
             <tbody id="product-table-body"></tbody>
@@ -149,6 +150,13 @@
             <a href="/member/product-detail?id=${product.product_id}" class="btn btn-primary btn-sm">
               View Details
             </a>
+          </td>
+          <td>
+            <button 
+              class="btn btn-success btn-sm"
+              onclick="buyProduct(${product.product_id})">
+              Buy
+            </button>
           </td>
         `;
 
