@@ -14,4 +14,7 @@ const cartController = require('../controllers/cartController');
 // GET /cart to retrieve all shopping cart items belonging to the authenticated member
 router.get('/', auth.ensureAuthenticated, cartController.getCartItems);
 
+// POST /cart to add a menu item into the authenticated user's shopping cart (creates cart row on-demand if missing)
+router.post('/', auth.ensureAuthenticated, cartController.createCartItems);
+
 module.exports = router;
