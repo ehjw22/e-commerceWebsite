@@ -91,6 +91,104 @@ class CartModel {
             throw error;
         }
     }
+
+    static async createCartItem(memberId, productId, quantity) {
+        const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
+        const cleanProductId = this.validatePositiveInteger(productId, 'Product ID');
+        const cleanQuantity = this.validatePositiveInteger(quantity, 'Quantity');
+
+        // Business Rule: Cap max items per single order row
+        if (cleanQuantity > 99) {
+            throw new ValidationError("Cannot add more than 99 units of a single item at once.");
+        }
+
+        // 1. Backend Business Validation: Check if Product exists and is available
+        const verifiedProduct = await prisma.product.findUnique({
+            where: { productId: cleanProductId }
+        });
+
+        if (!verifiedProduct) {
+            throw new NotFoundError("Target menu item does not exist.");
+        }
+
+        if (verifiedProduct.isAvailable === false) {
+            throw new ValidationError(`"${verifiedProduct.name}" is currently out of stock.`);
+        }
+
+        // 2. Ensure Member exists before creating cart
+        const verifiedMember = await prisma.member.findUnique({
+            where: { memberId: cleanMemberId }
+        });
+
+        if (!verifiedMember) {
+            throw new NotFoundError("Member record does not exist.");
+        }
+
+        // 3. Dynamic Cart Allocation (On-Demand Cart Creation)
+        const userCart = await prisma.cart.upsert({
+            where: { memberId: cleanMemberId },
+            update: { createdAt: new Date() },
+            create: { memberId: cleanMemberId, createdAt: new Date() }
+        });
+
+        // 4. Create or Increment Item Quantity safely
+        return await prisma.cartItem.upsert({
+            where: {
+                cartId_productId: {
+                    cartId: userCart.cartId,
+                    productId: cleanProductId
+                }
+            },
+            update: { quantity: { increment: cleanQuantity } },
+            create: {
+                cartId: userCart.cartId,
+                productId: cleanProductId,
+                quantity: cleanQuantity
+            }
+        });
+    }
+    
+    static async update(memberId, productId, quantity) {
+        const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
+        const cleanProductId = this.validatePositiveInteger(productId, 'Product ID');
+        // Allow zero so setting quantity to 0 removes the item automatically
+        const cleanQuantity = this.validatePositiveInteger(quantity, 'Quantity', true);
+
+        if (cleanQuantity > 99) {
+            throw new ValidationError("Maximum quantity limit per item is 99.");
+        }
+
+        // Edge-case business rule: If quantity updated to 0, trigger deletion logic
+        if (cleanQuantity === 0) {
+            return await this.delete(cleanMemberId, cleanProductId);
+        }
+
+        const userCart = await prisma.cart.findUnique({
+            where: { memberId: cleanMemberId }
+        });
+
+        if (!userCart) {
+            throw new NotFoundError("Shopping cart record not found for this member.");
+        }
+
+        try {
+            return await prisma.cartItem.update({
+                where: {
+                    cartId_productId: {
+                        cartId: userCart.cartId,
+                        productId: cleanProductId
+                    }
+                },
+                data: { quantity: cleanQuantity }
+            });
+        } catch (error) {
+            // Catch Prisma Foreign Key/Not Found Code (P2025)
+            if (error.code === 'P2025') {
+                throw new NotFoundError("Item does not exist in your shopping cart.");
+            }
+            throw error;
+        }
+    }
 }
 
 // Export both the model class and custom error types
