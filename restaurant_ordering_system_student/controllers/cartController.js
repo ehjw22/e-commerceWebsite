@@ -73,6 +73,30 @@ class CartController {
         }
     }
 
+    static async deleteCartItem(req, res) {
+        try {
+            const productId = req.params.id;
+            const memberId = req.session.userId;
+
+            if (!memberId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Unauthorized access: Please log in.'
+                });
+            }
+
+            // Delegating route parameter & ownership validation to CartModel.delete
+            await CartModel.delete(memberId, productId);
+
+            res.json({
+                success: true,
+                message: 'Item removed from cart successfully'
+            });
+        } catch (error) {
+            CartController.handleError(res, error, 'Failed to delete cart item');
+        }
+    }
+
 }
 
 module.exports = CartController;
