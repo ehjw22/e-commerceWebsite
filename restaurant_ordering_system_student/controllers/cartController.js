@@ -97,6 +97,33 @@ class CartController {
         }
     }
 
+    // PUT /:id (Update cart items)
+    static async updateCartItems(req, res) {
+        try {
+            const productId = req.params.id;
+            const { quantity } = req.body;
+            const memberId = req.session.userId;
+
+            if (!memberId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Unauthorized access: Please log in.'
+                });
+            }
+
+            // Delegating type conversions and boundary rules to CartModel.update
+            const data = await CartModel.update(memberId, productId, quantity);
+
+            res.json({
+                success: true,
+                message: 'Cart item successfully updated',
+                data: data
+            });
+        } catch (error) {
+            CartController.handleError(res, error, 'Failed to update cart item');
+        }
+    }
+
 }
 
 module.exports = CartController;
