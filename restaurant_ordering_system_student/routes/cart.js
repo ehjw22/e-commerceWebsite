@@ -17,4 +17,7 @@ router.get('/', auth.ensureAuthenticated, cartController.getCartItems);
 // POST /cart to add a menu item into the authenticated user's shopping cart (creates cart row on-demand if missing)
 router.post('/', auth.ensureAuthenticated, cartController.createCartItems);
 
+// DELETE /cart/:id to permanently remove a specific item from the cart using its product ID passed as a route parameter
+router.delete('/:id', auth.ensureAuthenticated, cartController.deleteCartItem);
+
 module.exports = router;
