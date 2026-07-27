@@ -23,4 +23,7 @@ router.delete('/:id', auth.ensureAuthenticated, cartController.deleteCartItem);
 // PUT /cart/:id to update the quantity value of a specific item inside the cart using its product ID passed as a route parameter
 router.put('/:id', auth.ensureAuthenticated, cartController.updateCartItems);
 
+// GET /cart/:id to calculate and retrieve the total cost summary of the cart (e.g., items subtotal, delivery tiers, final price)
+router.get('/:id', auth.ensureAuthenticated, cartController.getCartSummary);
+
 module.exports = router;
