@@ -20,4 +20,7 @@ router.post('/', auth.ensureAuthenticated, cartController.createCartItems);
 // DELETE /cart/:id to permanently remove a specific item from the cart using its product ID passed as a route parameter
 router.delete('/:id', auth.ensureAuthenticated, cartController.deleteCartItem);
 
+// PUT /cart/:id to update the quantity value of a specific item inside the cart using its product ID passed as a route parameter
+router.put('/:id', auth.ensureAuthenticated, cartController.updateCartItems);
+
 module.exports = router;
