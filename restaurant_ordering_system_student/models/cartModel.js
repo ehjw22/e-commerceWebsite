@@ -58,6 +58,39 @@ class CartModel {
         return userCart ? userCart.cartItem : [];
     }
 
+    static async delete(memberId, productId) {
+        // 1. Convert and validate inputs into clean integers
+        const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
+        const cleanProductId = this.validatePositiveInteger(productId, 'Product ID');
+
+        // 2. Fetch the user's cart
+        const userCart = await prisma.cart.findUnique({
+            where: { memberId: cleanMemberId }
+        });
+
+        if (!userCart) {
+            throw new NotFoundError("Shopping cart record not found for this member.");
+        }
+
+        try {
+            // 3. Delete using Prisma's compound unique key name
+            return await prisma.cartItem.delete({
+                where: {
+                    cartId_productId: {
+                        cartId: userCart.cartId,
+                        productId: cleanProductId
+                    }
+                }
+            });
+        } catch (error) {
+            // P2025 is Prisma's error code for "Record to delete does not exist"
+            if (error.code === 'P2025') {
+                throw new NotFoundError("Item could not be found in your cart to delete.");
+            }
+            // Throw any unexpected database errors up to the controller
+            throw error;
+        }
+    }
 }
 
 // Export both the model class and custom error types
