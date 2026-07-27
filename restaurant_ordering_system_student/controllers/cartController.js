@@ -124,6 +124,16 @@ class CartController {
         }
     }
 
+    // GET /:id (Retrieve cart summary)
+    static async getCartSummary(req, res) {
+        try {
+            // Placeholder for summary implementation
+            res.json({ success: true, message: "Summary endpoint placeholder" });
+        } catch (error) {
+            CartController.handleError(res, error, 'Failed to retrieve cart summary');
+        }
+    }
+
 }
 
 module.exports = CartController;
