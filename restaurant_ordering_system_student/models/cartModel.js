@@ -147,7 +147,7 @@ class CartModel {
             }
         });
     }
-    
+
     static async update(memberId, productId, quantity) {
         const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
         const cleanProductId = this.validatePositiveInteger(productId, 'Product ID');
@@ -188,6 +188,23 @@ class CartModel {
             }
             throw error;
         }
+    }
+
+    static async getAll(memberId) {
+        const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
+
+        const userCart = await prisma.cart.findUnique({
+            where: { memberId: cleanMemberId },
+            include: {
+                cartItem: {
+                    include: {
+                        product: true
+                    }
+                }
+            }
+        });
+
+        return userCart ? userCart.cartItem : [];
     }
 }
 
