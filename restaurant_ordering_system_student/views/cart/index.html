@@ -49,7 +49,19 @@
     </div>
 
     <!-- Dynamic Feedback Alert Component for Back-end Error/Success Messages -->
-    <div id="alert-box" class="alert d-none" role="alert"></div>
+    <div id="alert-box"
+        class="alert d-none alert-dismissible fade show"
+        role="alert">
+
+        <span id="alert-msg"></span>
+
+        <button
+            type="button"
+            class="btn-close"
+            onclick="hideAlert()">
+        </button>
+
+    </div>
 
     <div class="row">
       <!-- Cart Items List Layout (Left Column) -->
