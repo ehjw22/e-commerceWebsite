@@ -371,7 +371,7 @@
 
       document.getElementById('modal-subtotal').innerText = (price * qty).toFixed(2);
     }
-    
+
     async function submitModalAddItem() {
       const select = document.getElementById('modal-product-select');
       const productId = select.value;
@@ -405,6 +405,16 @@
       }
     }
 
+    function showAlert(msg, type) {
+      const box = document.getElementById('alert-box');
+      document.getElementById('alert-msg').innerText = msg;
+      box.className = `alert alert-${type} alert-dismissible fade show`;
+      box.classList.remove('d-none');
+    }
+
+    function hideAlert() {
+      document.getElementById('alert-box').classList.add('d-none');
+    }
   </script>
 </body>
 </html>
