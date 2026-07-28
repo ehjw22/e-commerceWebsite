@@ -285,6 +285,44 @@
 
       document.getElementById('cart-grand-total').innerText = grandTotal.toFixed(2);
     }
+    
+    async function updateQty(productId, newQty) {
+      if (newQty < 1) {
+        deleteItem(productId);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/cart/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: newQty })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to update quantity.');
+
+        fetchCartItems(); // Reload table
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      }
+    }
+
+    async function deleteItem(productId) {
+      try {
+        const response = await fetch(`/cart/${productId}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to delete item.');
+
+        showAlert('Item removed from cart.', 'info');
+        fetchCartItems();
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      }
+    }
   </script>
 </body>
 </html>
