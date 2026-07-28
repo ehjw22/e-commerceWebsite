@@ -200,5 +200,91 @@
   </div>
   <!-- Bootstrap Javascript Bundle Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let cartItems = [];
+    let availableProducts = [];
+    let modalInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        modalInstance =
+            new bootstrap.Modal(
+                document.getElementById('addItemModal')
+            );
+
+        fetchCartItems();
+
+    });
+
+    async function fetchCartItems() {
+      try {
+        const response = await fetch('/cart');
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message || 'Failed to fetch cart.');
+
+        cartItems = data.rows;
+        renderCart();
+      } catch (error) {
+        console.error('Error fetching cart:', error);
+        showAlert('Could not load cart items: ' + error.message, 'danger');
+      }
+    }
+
+    function renderCart() {
+      const tbody = document.getElementById('cart-table-body');
+      const emptyView = document.getElementById('empty-cart-view');
+      const contentView = document.getElementById('cart-content-view');
+
+      tbody.innerHTML = '';
+
+      if (!cartItems || cartItems.length === 0) {
+        contentView.classList.add('d-none');
+        emptyView.classList.remove('d-none');
+        return;
+      }
+
+      emptyView.classList.add('d-none');
+      contentView.classList.remove('d-none');
+
+      let grandTotal = 0;
+
+      cartItems.forEach(item => {
+        // 1. Extract product details from nested object
+        const product = item.product;
+        const productId = item.productId;
+        const name = product.name;
+        const price = parseFloat(product.price);
+        const qty = parseInt(item.quantity, 10);
+        
+        // 2. Calculate row totals
+        const rowTotal = price * qty;
+        grandTotal += rowTotal;
+
+        // 3. Construct HTML table row
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="fw-bold">${name}</td>
+          <td>$${price.toFixed(2)}</td>
+          <td>
+            <div class="input-group input-group-sm mx-auto" style="max-width: 120px;">
+              <button class="btn btn-outline-secondary" onclick="updateQty(${productId}, ${qty - 1})">-</button>
+              <input type="text" class="form-control text-center bg-white" value="${qty}" readonly>
+              <button class="btn btn-outline-secondary" onclick="updateQty(${productId}, ${qty + 1})">+</button>
+            </div>
+          </td>
+          <td class="fw-bold text-dark">$${rowTotal.toFixed(2)}</td>
+          <td class="text-end">
+            <button class="btn btn-outline-danger btn-sm" onclick="deleteItem(${productId})" title="Remove item">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('cart-grand-total').innerText = grandTotal.toFixed(2);
+    }
+  </script>
 </body>
 </html>
