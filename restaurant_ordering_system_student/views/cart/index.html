@@ -371,6 +371,39 @@
 
       document.getElementById('modal-subtotal').innerText = (price * qty).toFixed(2);
     }
+    
+    async function submitModalAddItem() {
+      const select = document.getElementById('modal-product-select');
+      const productId = select.value;
+      const quantity = parseInt(document.getElementById('modal-item-qty').value, 10);
+
+      if (!productId) {
+        alert('Please choose an item from the list.');
+        return;
+      }
+
+      const btn = document.getElementById('confirm-add-btn');
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: parseInt(productId, 10), quantity })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to add item to cart.');
+
+        modalInstance.hide();
+        showAlert('Item successfully added to your cart!', 'success');
+        fetchCartItems();
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
 
   </script>
 </body>
