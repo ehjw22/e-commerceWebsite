@@ -323,6 +323,55 @@
         showAlert(error.message, 'danger');
       }
     }
+
+    async function openAddItemModal() {
+      const select = document.getElementById('modal-product-select');
+      select.innerHTML = '<option value="" disabled selected>Loading menu items...</option>';
+      modalInstance.show();
+
+      try {
+        const res = await fetch('/products');
+        const data = await res.json();
+
+        if (!res.ok || !data.success) throw new Error(data.message || 'Failed to fetch catalog.');
+
+        availableProducts = (data.products || []).filter(p => p.is_available ?? p.isAvailable);
+        
+        select.innerHTML = '<option value="" disabled selected>-- Select an Item --</option>';
+        availableProducts.forEach(prod => {
+          const id = prod.product_id || prod.productId;
+          const price = parseFloat(prod.price).toFixed(2);
+          select.innerHTML += `<option value="${id}" data-price="${price}">${prod.name} ($${price})</option>`;
+        });
+
+        document.getElementById('modal-item-qty').value = 1;
+        calculateModalSubtotal();
+      } catch (error) {
+        showAlert('Could not load products: ' + error.message, 'danger');
+      }
+    }
+
+    function adjustModalQty(delta) {
+      const qtyInput = document.getElementById('modal-item-qty');
+      let current = parseInt(qtyInput.value, 10) || 1;
+      current = Math.max(1, current + delta);
+      qtyInput.value = current;
+      calculateModalSubtotal();
+    }
+
+    function onModalProductChange() {
+      calculateModalSubtotal();
+    }
+
+    function calculateModalSubtotal() {
+      const select = document.getElementById('modal-product-select');
+      const selectedOption = select.options[select.selectedIndex];
+      const price = selectedOption ? parseFloat(selectedOption.getAttribute('data-price') || 0) : 0;
+      const qty = parseInt(document.getElementById('modal-item-qty').value, 10) || 1;
+
+      document.getElementById('modal-subtotal').innerText = (price * qty).toFixed(2);
+    }
+
   </script>
 </body>
 </html>
