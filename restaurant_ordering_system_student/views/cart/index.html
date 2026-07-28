@@ -40,7 +40,13 @@
 
   <!-- Main Content Container -->
   <div class="container my-5">
-    <h2 class="mb-4"><i class="bi bi-basket3"></i> Your Shopping Cart</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="bi bi-cart3"></i> Your Shopping Cart</h2>
+
+      <button class="btn btn-primary" onclick="openAddItemModal()">
+        <i class="bi bi-plus-lg"></i> Add Item to Cart
+      </button>
+    </div>
 
     <!-- Dynamic Feedback Alert Component for Back-end Error/Success Messages -->
     <div id="alert-box" class="alert d-none" role="alert"></div>
