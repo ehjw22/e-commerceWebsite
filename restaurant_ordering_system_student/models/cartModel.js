@@ -41,23 +41,6 @@ class CartModel {
         return parsed;
     }
 
-    static async getAll(memberId) {
-        const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
-
-        const userCart = await prisma.cart.findUnique({
-            where: { memberId: cleanMemberId },
-            include: {
-                cartItem: {
-                    include: {
-                        product: true
-                    }
-                }
-            }
-        });
-
-        return userCart ? userCart.cartItem : [];
-    }
-
     static async delete(memberId, productId) {
         // 1. Convert and validate inputs into clean integers
         const cleanMemberId = this.validatePositiveInteger(memberId, 'Member ID');
