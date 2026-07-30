@@ -79,7 +79,8 @@ model saleOrder {
   deliveryAddress String?         @map("delivery_address")
   member          member?         @relation(fields: [memberId], references: [memberId], onDelete: NoAction, onUpdate: NoAction)
   saleOrderItem   saleOrderItem[]
-
+  finalAmount     Decimal         @map("final_amount") @db.Decimal(10, 2) @default(0)
+  saleDiscounts       saleDiscount[]
   @@map("sale_order")
 }
 
@@ -102,7 +103,6 @@ model cart {
   memberId     Int            @unique @map("member_id")
   createdAt    DateTime?      @default(now()) @map("created_at") @db.Timestamp(6)
   member       member         @relation(fields: [memberId], references: [memberId], onDelete: Cascade, onUpdate: NoAction)
-  cartDiscount cartDiscount[]
   cartItem     cartItem[]
 
   @@map("cart")
@@ -130,15 +130,15 @@ model discount {
   value           Decimal        @db.Decimal(10, 2)
   targetProductId Int?           @map("target_product_id") // for product_quantity
   isActive        Boolean?       @default(true) @map("is_active")
-  cartDiscount    cartDiscount[]
+  saleDiscount    saleDiscount[]
 }
 
-model cartDiscount {
-  cartId     Int      @map("cart_id")
-  discountId Int      @map("discount_id")
-  cart       cart     @relation(fields: [cartId], references: [cartId], onDelete: Cascade, onUpdate: NoAction)
-  discount   discount @relation(fields: [discountId], references: [discountId], onDelete: Cascade, onUpdate: NoAction)
+model saleDiscount {
+  saleOrderId Int      @map("sale_order_id")
+  discountId  Int      @map("discount_id")
+  saleOrder   saleOrder     @relation(fields: [saleOrderId], references: [orderId], onDelete: Cascade, onUpdate: NoAction)
+  discount    discount @relation(fields: [discountId], references: [discountId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@id([cartId, discountId])
-  @@map("cart_discount")
+  @@id([saleOrderId, discountId])
+  @@map("sale_discount")
 }
