@@ -14,4 +14,7 @@ router.get('/cart', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../views/cart/index.html'));
 });
 
+router.get('/checkout', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/cart/checkout.html'))
+})
 module.exports = router;
