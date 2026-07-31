@@ -246,6 +246,28 @@ class CartModel {
 
     }
 
+    // Place the order by calling the PostgreSQL stored procedure
+    static async placeOrder(memberId, deliveryAddress, totalAmt) {
+
+        const cleanMemberId =
+            this.validatePositiveInteger(
+                memberId,
+                "Member ID"
+            );
+
+        await prisma.$executeRaw`
+            CALL place_orders(
+                ${Number(cleanMemberId)}::INT,
+                ${totalAmt}::DECIMAL,
+                ${deliveryAddress}
+            )
+        `;
+
+        return {
+            message: "Order placed successfully."
+        };
+
+    }
 }
 
 // Export both the model class and custom error types
