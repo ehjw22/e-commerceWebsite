@@ -178,6 +178,35 @@ class CartController {
         }
     }
 
+    // POST /cart/checkout (Place order)
+    static async placeOrder(req, res) {
+        try {
+
+            const memberId = req.session.userId;
+
+            if (!memberId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized access: Please log in."
+                });
+            }
+
+            const result = await CartModel.placeOrder(memberId, req.body.deliveryAddress, req.body.finalAmount);
+
+            res.json({
+                success: true,
+                message: "Order placed successfully.",
+                data: result
+            });
+
+        } catch (error) {
+            CartController.handleError(
+                res,
+                error,
+                "Unable to place order."
+            );
+        }
+    }
 }
 
 module.exports = CartController;
