@@ -1,5 +1,8 @@
 // controllers/cartController.js
 const { CartModel, ValidationError, NotFoundError } = require('../models/cartModel.js');
+// cartController.js
+
+const { DiscountModel } = require("../models/discountModel");
 
 class CartController {
     static handleError(res, error, defaultMessage) {
@@ -127,13 +130,22 @@ class CartController {
     // GET /:id (Retrieve cart summary)
     static async getCartSummary(req, res) {
         try {
-            // Placeholder for summary implementation
-            res.json({ success: true, message: "Summary endpoint placeholder" });
-        } catch (error) {
-            CartController.handleError(res, error, 'Failed to retrieve cart summary');
+            const memberId = req.session.userId;
+            const summary = await DiscountModel.calculateDiscounts(memberId);
+
+            res.json({
+                success: true,
+                data: summary
+            });
+
+        } catch (err) {
+            CartController.handleError(
+                res,
+                err,
+                "Unable to calculate cart summary."
+            );
         }
     }
-
 }
 
 module.exports = CartController;
