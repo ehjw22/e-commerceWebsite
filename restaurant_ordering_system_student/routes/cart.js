@@ -20,6 +20,9 @@ router.get('/summary', auth.ensureAuthenticated, cartController.getCartSummary);
 // GET /cart/checkout to checkout the items in the cart
 router.get('/checkout', auth.ensureAuthenticated, cartController.getCheckoutSummary);
 
+// POST /cart/checkout
+router.post('/checkout', auth.ensureAuthenticated, cartController.placeOrder);
+
 // POST /cart to add a menu item into the authenticated user's shopping cart (creates cart row on-demand if missing)
 router.post('/', auth.ensureAuthenticated, cartController.createCartItems);
 
