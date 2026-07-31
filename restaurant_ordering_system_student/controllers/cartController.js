@@ -146,6 +146,38 @@ class CartController {
             );
         }
     }
+
+    // GET /cart/checkout (Retrieve final checkout summary)
+    static async getCheckoutSummary(req, res) {
+        try {
+
+            const memberId = req.session.userId;
+
+            if (!memberId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized access: Please log in."
+                });
+            }
+
+            const summary = await CartModel.getCheckoutSummary(memberId);
+
+            res.json({
+                success: true,
+                data: summary
+            });
+
+        } catch (error) {
+
+            CartController.handleError(
+                res,
+                error,
+                "Unable to retrieve checkout summary."
+            );
+
+        }
+    }
+
 }
 
 module.exports = CartController;
