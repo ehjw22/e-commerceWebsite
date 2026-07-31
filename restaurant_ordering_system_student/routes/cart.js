@@ -14,8 +14,11 @@ const cartController = require('../controllers/cartController');
 // GET /cart to retrieve all shopping cart items belonging to the authenticated member
 router.get('/', auth.ensureAuthenticated, cartController.getCartItems);
 
-// GET /cart/:id to calculate and retrieve the total cost summary of the cart (e.g., items subtotal, delivery tiers, final price)
+// GET /cart/summary to calculate and retrieve the total cost summary of the cart (e.g., items subtotal, delivery tiers, final price)
 router.get('/summary', auth.ensureAuthenticated, cartController.getCartSummary);
+
+// GET /cart/checkout to checkout the items in the cart
+router.get('/checkout', auth.ensureAuthenticated, cartController.getCheckoutSummary);
 
 // POST /cart to add a menu item into the authenticated user's shopping cart (creates cart row on-demand if missing)
 router.post('/', auth.ensureAuthenticated, cartController.createCartItems);
