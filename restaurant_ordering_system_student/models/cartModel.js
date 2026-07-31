@@ -2,6 +2,8 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const { DiscountModel } = require('./discountModel');
+
 // Custom Domain Error Classes for Controller Mapping
 class ValidationError extends Error {
     constructor(message) {
@@ -189,6 +191,61 @@ class CartModel {
 
         return userCart ? userCart.cartItem : [];
     }
+
+    // Retrieve checkout summary (available + unavailable items)
+    static async getCheckoutSummary(memberId) {
+
+        const cleanMemberId = this.validatePositiveInteger(
+            memberId,
+            "Member ID"
+        );
+
+        const userCart = await prisma.cart.findUnique({
+            where: {
+                memberId: cleanMemberId
+            },
+            include: {
+                cartItem: {
+                    include: {
+                        product: true
+                    }
+                }
+            }
+        });
+
+        if (!userCart) {
+            throw new NotFoundError(
+                "Shopping cart record not found."
+            );
+        }
+
+        // Split items into available and unavailable
+        const availableItems = userCart.cartItem.filter(
+            item => item.product.isAvailable
+        );
+
+        const unavailableItems = userCart.cartItem.filter(
+            item => !item.product.isAvailable
+        );
+
+        // Reuse the existing discount logic
+        const summary =
+            await DiscountModel.calculateDiscounts(
+                cleanMemberId,
+                availableItems
+            );
+
+        return {
+            availableItems,
+            unavailableItems,
+            subtotal: summary.subtotal,
+            discounts: summary.discounts,
+            deliveryFee: summary.deliveryFee,
+            total: summary.total
+        };
+
+    }
+
 }
 
 // Export both the model class and custom error types
