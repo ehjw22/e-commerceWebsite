@@ -61,15 +61,12 @@
             <tbody id="product-table-body"></tbody>
           </table>
         </div>
-        <div class="d-flex flex-column align-items-end gap-2">
-          <a id="openModal" class="btn btn-primary btn-sm w-25 openModal">
-            Buy
-          </a>
-        </div>
+
         <div id="no-products" class="alert alert-info mt-3" style="display: none;">
           No products available.
         </div>
-
+        
+        <!--
         <div class="modal fade" id="buyProductModal" tabindex="-1">
           <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -81,12 +78,10 @@
 
               <div class="modal-body">
 
-                <!-- Product list -->
                 <div id="modal-product-list"></div>
 
                 <hr>
 
-                <!-- Total -->
                 <div class="d-flex justify-content-between align-items-center">
                   <h5 class="mb-0">Total:</h5>
                   <h5 class="mb-0">$<span id="modal-total">0.00</span></h5>
@@ -106,7 +101,9 @@
 
             </div>
           </div>
-        </div>
+        </div> 
+      -->
+        
       </div>
     </div>
   </main>
@@ -172,143 +169,143 @@
       alert('Failed to load products.');
     }
   }
-  const cart = {}; // { productId: { price, qty } }
+  // const cart = {}; // { productId: { price, qty } }
 
-  function changeQty(productId, delta) {
-    const product = allProducts.find(p => p.product_id === productId);
+  // function changeQty(productId, delta) {
+  //   const product = allProducts.find(p => p.product_id === productId);
 
-    const item = cart[productId] || { 
-      qty: 0, 
-      price: product ? parseFloat(product.price) : 0 
-    };
+  //   const item = cart[productId] || { 
+  //     qty: 0, 
+  //     price: product ? parseFloat(product.price) : 0 
+  //   };
 
-    item.qty = Math.max(0, item.qty + delta);
+  //   item.qty = Math.max(0, item.qty + delta);
 
-    cart[productId] = item;
+  //   cart[productId] = item;
 
-    document.getElementById(`qty-${productId}`).innerText = item.qty;
+  //   document.getElementById(`qty-${productId}`).innerText = item.qty;
 
-    updateTotal();
-  }
+  //   updateTotal();
+  // }
 
-  async function submitOrder() {
-    const items = [];
+  // async function submitOrder() {
+  //   const items = [];
 
-    for (const productId in cart) {
+  //   for (const productId in cart) {
 
-      if (cart[productId].qty > 0) {
-        items.push({
-          productId: Number(productId),
-          quantity: cart[productId].qty
-        });
-      }
+  //     if (cart[productId].qty > 0) {
+  //       items.push({
+  //         productId: Number(productId),
+  //         quantity: cart[productId].qty
+  //       });
+  //     }
 
-    }
+  //   }
 
-    if (items.length === 0) {
-      alert('Please select at least one product.');
-      return;
-    }
+  //   if (items.length === 0) {
+  //     alert('Please select at least one product.');
+  //     return;
+  //   }
 
-    try {
+  //   try {
 
-      const response = await fetch('/products/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          items: items
-        })
-      });
+  //     const response = await fetch('/products/purchase', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         items: items
+  //       })
+  //     });
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Purchase failed');
-      }
+  //     if (!response.ok) {
+  //       throw new Error(data.message || 'Purchase failed');
+  //     }
 
-      alert(
-        `Order #${data.orderId} placed successfully!\nTotal: $${data.totalAmount}`
-      );
+  //     alert(
+  //       `Order #${data.orderId} placed successfully!\nTotal: $${data.totalAmount}`
+  //     );
 
-      // Reset cart
-      Object.keys(cart).forEach(id => {
-        cart[id].qty = 0;
+  //     // Reset cart
+  //     Object.keys(cart).forEach(id => {
+  //       cart[id].qty = 0;
 
-        const qtyElement = document.getElementById(`qty-${id}`);
-        if (qtyElement) {
-          qtyElement.innerText = '0';
-        }
-      });
+  //       const qtyElement = document.getElementById(`qty-${id}`);
+  //       if (qtyElement) {
+  //         qtyElement.innerText = '0';
+  //       }
+  //     });
 
-      updateTotal();
+  //     updateTotal();
 
-      const modalElement = document.getElementById('buyProductModal');
-      const modal = bootstrap.Modal.getInstance(modalElement);
+  //     const modalElement = document.getElementById('buyProductModal');
+  //     const modal = bootstrap.Modal.getInstance(modalElement);
 
-      if (modal) {
-        modal.hide();
-      }
+  //     if (modal) {
+  //       modal.hide();
+  //     }
 
-    } catch (error) {
+  //   } catch (error) {
 
-      console.error(error);
+  //     console.error(error);
 
-      alert(error.message || 'Failed to place order.');
+  //     alert(error.message || 'Failed to place order.');
 
-    }
-  }
+  //   }
+  // }
 
-  function updateTotal() {
-    let total = 0;
+  // function updateTotal() {
+  //   let total = 0;
     
-    for (const id in cart) {
-      // console.log(cart[id])
-      total += cart[id].qty * cart[id].price;
-    }
+  //   for (const id in cart) {
+  //     // console.log(cart[id])
+  //     total += cart[id].qty * cart[id].price;
+  //   }
 
-    document.getElementById("modal-total").innerText = total.toFixed(2);
-  }
-  // OPEN MODAL BUTTON
-  document.getElementById('openModal').addEventListener('click', () => {
+  //   document.getElementById("modal-total").innerText = total.toFixed(2);
+  // }
+  // // OPEN MODAL BUTTON
+  // document.getElementById('openModal').addEventListener('click', () => {
 
-    const container = document.getElementById('modal-product-list');
+  //   const container = document.getElementById('modal-product-list');
 
-    container.innerHTML = '';
+  //   container.innerHTML = '';
 
-    // show all products inside modal
-    container.innerHTML = allProducts.map(p => `
-    <div class="d-flex justify-content-between align-items-center mb-3">
+  //   // show all products inside modal
+  //   container.innerHTML = allProducts.map(p => `
+  //   <div class="d-flex justify-content-between align-items-center mb-3">
 
-      <div>
-        <strong>${p.name}</strong><br>
-        <small>$${parseFloat(p.price).toFixed(2)}</small>
-      </div>
+  //     <div>
+  //       <strong>${p.name}</strong><br>
+  //       <small>$${parseFloat(p.price).toFixed(2)}</small>
+  //     </div>
 
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary"
-                onclick="changeQty(${p.product_id}, -1)">
-          -
-        </button>
+  //     <div class="d-flex align-items-center gap-2">
+  //       <button class="btn btn-sm btn-outline-secondary"
+  //               onclick="changeQty(${p.product_id}, -1)">
+  //         -
+  //       </button>
 
-        <span id="qty-${p.product_id}">0</span>
+  //       <span id="qty-${p.product_id}">0</span>
 
-        <button class="btn btn-sm btn-outline-secondary"
-                onclick="changeQty(${p.product_id}, 1)">
-          +
-        </button>
-      </div>
+  //       <button class="btn btn-sm btn-outline-secondary"
+  //               onclick="changeQty(${p.product_id}, 1)">
+  //         +
+  //       </button>
+  //     </div>
 
-    </div>
-  `).join('');
+  //   </div>
+  // `).join('');
 
-    const modal = new bootstrap.Modal(
-      document.getElementById('buyProductModal')
-    );
+  //   const modal = new bootstrap.Modal(
+  //     document.getElementById('buyProductModal')
+  //   );
 
-    modal.show();
-  });
+  //   modal.show();
+  // });
   </script>
 </body>
 </html>
