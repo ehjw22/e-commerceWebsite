@@ -351,6 +351,38 @@
 
     fetchProducts();
   });
+
+  async function addToCart() {
+    if (!selectedProduct)
+        return;
+
+    const quantity = parseInt(document.getElementById("modal-quantity").value);
+
+    try {
+        const response = await fetch("/cart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                productId: selectedProduct.product_id,
+                quantity: quantity
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
+        }
+
+        alert("Item added to cart successfully!");
+
+        buyModal.hide();
+    } catch (err) {
+        alert(err.message);
+    }
+  }
   // const cart = {}; // { productId: { price, qty } }
 
   // function changeQty(productId, delta) {
