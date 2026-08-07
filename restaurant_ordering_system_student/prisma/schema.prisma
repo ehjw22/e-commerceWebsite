@@ -131,6 +131,7 @@ model discount {
   value           Decimal        @db.Decimal(10, 2)
   targetProductId Int?           @map("target_product_id")
   isActive        Boolean?       @default(true) @map("is_active")
+  valueType       String         @map("value_type")
   saleDiscount    saleDiscount[]
   targetProduct   product?       @relation(fields: [targetProductId], references: [productId], onDelete: Cascade)
 }
