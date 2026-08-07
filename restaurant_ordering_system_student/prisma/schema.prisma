@@ -67,6 +67,7 @@ model product {
   diningFeedback diningFeedback[]
   saleOrderItem  saleOrderItem[]
   cartItem       cartItem[]
+  discounts      discount[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -128,9 +129,10 @@ model discount {
   minTrigger      Decimal        @map("min_trigger") @db.Decimal(10, 2)// can be used for all three
   maxTrigger      Decimal?       @map("max_trigger") @db.Decimal(10, 2)
   value           Decimal        @db.Decimal(10, 2)
-  targetProductId Int?           @map("target_product_id") // for product_quantity
+  targetProductId Int?           @map("target_product_id")
   isActive        Boolean?       @default(true) @map("is_active")
   saleDiscount    saleDiscount[]
+  targetProduct   product?       @relation(fields: [targetProductId], references: [productId], onDelete: Cascade)
 }
 
 model saleDiscount {
