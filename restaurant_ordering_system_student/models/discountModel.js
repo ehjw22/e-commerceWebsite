@@ -2,6 +2,28 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+const DISCOUNT_TYPES = {
+    PRODUCT_QUANTITY: "PRODUCT_QUANTITY",
+    CART_TOTAL: "CART_TOTAL",
+    DELIVERY: "DELIVERY"
+};
+
+class ValidationError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "ValidationError";
+        this.statusCode = 400;
+    }
+}
+
+class NotFoundError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "NotFoundError";
+        this.statusCode = 404;
+    }
+}
+
 class DiscountModel {
     static async calculateDiscounts(memberId, cartItems=null) {
         
@@ -59,7 +81,7 @@ class DiscountModel {
         let appliedDiscounts = [];
 
         for (const discount of availableDiscounts) {
-            if (discount.discountType === "PRODUCT_QUANTITY") {
+            if (discount.discountType === DISCOUNT_TYPES.PRODUCT_QUANTITY) {
                 const item =
                     items.find(
                         c =>
@@ -69,36 +91,46 @@ class DiscountModel {
                 if (!item)
                     continue;
                 if ( item.quantity >= Number(discount.minTrigger)) {
-                    const amount = Number(item.product.price) * item.quantity * Number(discount.value) / 100;
+                    let amount;
+
+                    if (discount.valueType === "PERCENTAGE") {
+                        amount = Number(item.product.price) * item.quantity * Number(discount.value) / 100;
+                    } else {
+                        amount = Number(discount.value);
+                    }
+
                     totalDiscount += amount;
 
                     appliedDiscounts.push({
-                        discountId:
-                            discount.discountId,
-                        name:
-                            discount.name,
+                        discountId: discount.discountId,
+                        name: discount.name,
                         amount
                     });
                 }
             }
 
-            if (discount.discountType === "CART_TOTAL") {
+            if (discount.discountType === DISCOUNT_TYPES.CART_TOTAL) {
+
                 if (subtotal >= Number(discount.minTrigger)) {
-                    
-                    const amount = subtotal * Number(discount.value)/100;
+                    let amount;
+
+                    if (discount.valueType === "PERCENTAGE") {
+                        amount = subtotal * Number(discount.value) / 100;
+                    } else {
+                        amount = Number(discount.value);
+                    }
+
                     totalDiscount += amount;
-                    
+
                     appliedDiscounts.push({
-                        discountId:
-                            discount.discountId,
-                        name:
-                            discount.name,
+                        discountId: discount.discountId,
+                        name: discount.name,
                         amount
                     });
                 }
             }
 
-            if (discount.discountType === "DELIVERY") {
+            if (discount.discountType === DISCOUNT_TYPES.DELIVERY) {
 
                 const min = Number(discount.minTrigger);
 
@@ -149,6 +181,47 @@ class DiscountModel {
             total
         };
     }
+
+    // Get all discounts
+    static async getDiscounts(filters = {}) {
+
+        const where = {};
+
+        if (filters.search) {
+            where.name = {
+                contains: filters.search,
+                mode: "insensitive"
+            };
+        }
+
+        if (filters.discountType) {
+            where.discountType = filters.discountType;
+        }
+
+        if (filters.isActive !== undefined && filters.isActive !== "") {
+            where.isActive = filters.isActive === true;
+        }
+
+        return await prisma.discount.findMany({
+            where,
+            include: {
+                targetProduct: {
+                    select: {
+                        productId: true,
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                discountId: "asc"
+            }
+        });
+
+    }
 }
 
-module.exports = { DiscountModel };
+module.exports = {
+    DiscountModel,
+    ValidationError,
+    NotFoundError
+};
