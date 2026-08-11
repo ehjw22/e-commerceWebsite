@@ -12,4 +12,7 @@ router.get("/", ensureAuthenticated, DiscountController.getDiscounts);
 // GET /discounts/:id
 router.get("/:id", ensureAuthenticated, DiscountController.getDiscountById);
 
+// DELETE /discounts/:id
+router.delete("/:id", ensureAuthenticated, DiscountController.deleteDiscount);
+
 module.exports = router;
