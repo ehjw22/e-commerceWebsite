@@ -50,7 +50,7 @@ class DiscountModel {
             };
         }
 
-        let items = cart.cartItem;
+        let items = cartItems ?? cart.cartItem;
 
         let subtotal = 0;
 
