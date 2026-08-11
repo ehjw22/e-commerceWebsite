@@ -89,23 +89,34 @@ class DiscountModel {
                     );
                 if (!item)
                     continue;
-                if ( item.quantity >= Number(discount.minTrigger)) {
-                    let amount;
+                if (item.quantity < Number(discount.minTrigger))
+                    continue;
+                
+                const highestTier = availableDiscounts
+                    .filter(d =>
+                        d.discountType === DISCOUNT_TYPES.PRODUCT_QUANTITY &&
+                        d.targetProductId === discount.targetProductId &&
+                        item.quantity >= Number(d.minTrigger)
+                    ).sort((a, b) => Number(b.minTrigger) - Number(a.minTrigger))[0];
 
-                    if (discount.valueType === "PERCENTAGE") {
-                        amount = Number(item.product.price) * item.quantity * Number(discount.value) / 100;
-                    } else {
-                        amount = Number(discount.value);
-                    }
+                // Skip lower tiers
+                if (discount.discountId !== highestTier.discountId)
+                    continue;
+                let amount;
 
-                    totalDiscount += amount;
-
-                    appliedDiscounts.push({
-                        discountId: discount.discountId,
-                        name: discount.name,
-                        amount
-                    });
+                if (discount.valueType === "PERCENTAGE") {
+                    amount = Number(item.product.price) * item.quantity * Number(discount.value) / 100;
+                } else {
+                    amount = Number(discount.value);
                 }
+
+                totalDiscount += amount;
+
+                appliedDiscounts.push({
+                    discountId: discount.discountId,
+                    name: discount.name,
+                    amount
+                });
             }
 
             if (discount.discountType === DISCOUNT_TYPES.CART_TOTAL) {
