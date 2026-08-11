@@ -304,6 +304,26 @@ class DiscountModel {
         });
     }
 
+    // Updating discount by ID
+    static async updateDiscount(discountId, data) {
+        discountId = Number(discountId);
+
+        if (isNaN(discountId)) {
+            throw new ValidationError("Invalid discount id.");
+        }
+
+        await this.getDiscountById(discountId);
+
+        this.validateDiscount(data);
+
+        return await prisma.discount.update({
+            where: {
+                discountId
+            },
+            data: this.buildDiscountData(data)
+        });
+    }
+
     // Delete Discount
     static async deleteDiscount(discountId) {
         discountId = Number(discountId);
