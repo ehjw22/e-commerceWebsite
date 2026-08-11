@@ -15,10 +15,18 @@ async function loadCheckout() {
         }
 
         checkoutData = result.data;
-        
-        finalDiscountedAmount = checkoutData.total;
         renderAvailableItems(checkoutData.availableItems);
         renderUnavailableItems(checkoutData.unavailableItems);
+        if (!checkoutData.availableItems || checkoutData.availableItems.length === 0) {
+            document.getElementById("place-order-btn").disabled = true;
+            showAlert(
+                "We are working hard to restock the items as quickly as possible. In the meantime, you can explore similar products.",
+                "warning"
+            );
+            return;
+        }
+        finalDiscountedAmount = checkoutData.total;
+        
         renderSummary(checkoutData);
     } catch (error) {
         console.error(error);
