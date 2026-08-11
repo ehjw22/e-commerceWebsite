@@ -62,6 +62,24 @@ class DiscountController {
         }
     }
 
+    // DELETE /:id (Delete discount)
+    static async deleteDiscount(req, res) {
+        try {
+            await DiscountModel.deleteDiscount(req.params.id);
+
+            res.json({
+                success: true,
+                message: "Discount deleted successfully."
+            });
+        } catch (error) {
+            DiscountController.handleError(
+                res,
+                error,
+                "Failed to delete discount."
+            );
+        }
+    }
+
 }
 
 module.exports = DiscountController;
