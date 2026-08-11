@@ -62,6 +62,25 @@ class DiscountController {
         }
     }
 
+    // POST / (Create new discount)
+    static async createDiscount(req, res) {
+        try {
+            const discount = await DiscountModel.createDiscount(req.body);
+
+            res.status(201).json({
+                success: true,
+                message: "Discount created successfully.",
+                data: discount
+            });
+        } catch (error) {
+            DiscountController.handleError(
+                res,
+                error,
+                "Failed to create discount."
+            );
+        }
+    }
+
     // DELETE /:id (Delete discount)
     static async deleteDiscount(req, res) {
         try {
