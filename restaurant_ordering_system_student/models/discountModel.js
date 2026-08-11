@@ -182,6 +182,52 @@ class DiscountModel {
         };
     }
 
+    // Validation for discount data
+    static validateDiscount(data) {
+        if (!["PERCENTAGE", "FIXED_AMOUNT"].includes(data.valueType)) {
+            throw new ValidationError("Invalid discount value type.");
+        }
+
+        if (!data.name?.trim()) {
+            throw new ValidationError("Discount name is required.");
+        }
+
+        if (!Object.values(DISCOUNT_TYPES).includes(data.discountType)) {
+            throw new ValidationError("Invalid discount type.");
+        }
+
+        if (Number(data.minTrigger) < 0) {
+            throw new ValidationError("Minimum trigger cannot be negative.");
+        }
+
+        if (data.maxTrigger !== "" && data.maxTrigger != null && Number(data.maxTrigger) < Number(data.minTrigger)) {
+            throw new ValidationError("Maximum trigger cannot be smaller than minimum trigger.");
+        }
+
+        if (Number(data.value) < 0) {
+            throw new ValidationError("Discount value cannot be negative.");
+        }
+
+        if (data.discountType === DISCOUNT_TYPES.PRODUCT_QUANTITY && !data.targetProductId) {
+            throw new ValidationError("Target product is required.");
+        }
+    }
+
+    // Building the discount data such that it is the correct format
+    static buildDiscountData(data) {
+        return {
+            name: data.name.trim(),
+            description: data.description || null,
+            discountType: data.discountType,
+            minTrigger: Number(data.minTrigger),
+            maxTrigger: data.maxTrigger === "" || data.maxTrigger == null ? null : Number(data.maxTrigger),
+            value: Number(data.value),
+            valueType: data.valueType,
+            targetProductId: data.discountType === DISCOUNT_TYPES.PRODUCT_QUANTITY ? Number(data.targetProductId) : null,
+            isActive: data.isActive ?? true
+        };
+    }
+
     // Get all discounts
     static async getDiscounts(filters = {}) {
 
@@ -247,6 +293,15 @@ class DiscountModel {
         }
 
         return discount;
+    }
+
+    // Create discount
+    static async createDiscount(data) {
+        this.validateDiscount(data);
+
+        return await prisma.discount.create({
+            data: this.buildDiscountData(data)
+        });
     }
 
     // Delete Discount
