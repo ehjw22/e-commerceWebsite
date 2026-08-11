@@ -24,7 +24,7 @@ async function fetchCartItems() {
         if (cartItems.length === 0) {
             return
         }
-        
+
         await updateSummary();
     } catch (error) {
         console.error('Error fetching cart:', error);
@@ -54,10 +54,10 @@ async function updateSummary() {
 
     summary.discounts.forEach(discount => {
 
-        savings += discount.amount;
-
         if (discount.name.toLowerCase().includes("delivery"))
             return;
+
+        savings += discount.amount;
 
         discountList.innerHTML += `
             <div class="d-flex justify-content-between text-success mb-2">
@@ -74,33 +74,49 @@ async function updateSummary() {
 
     const delivery = document.getElementById("delivery-container");
 
-    if (summary.deliveryFee === 0) {
-        savings += 8;
+    const deliveryDiscount = summary.discounts.find(discount =>
+        discount.name.toLowerCase().includes("delivery")
+    );
 
-        delivery.innerHTML = `
-            <div class="d-flex justify-content-between mb-2">
-                <span>Delivery</span>
-                <span>
-                    <del class="text-muted">
-                        $8.00
-                    </del>
-                    <span class="text-success fw-bold ms-2">
-                        FREE
+    if (deliveryDiscount) {
+
+        const originalFee = Number(deliveryDiscount.originalFee);
+        const finalFee = Number(deliveryDiscount.finalFee);
+        const discountAmount = Number(deliveryDiscount.amount);
+
+        // Only add actual delivery savings
+        savings += discountAmount;
+
+        if (discountAmount > 0) {
+
+            delivery.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>${deliveryDiscount.name}</span>
+
+                    <span>
+                        <del class="text-muted">
+                            $${originalFee.toFixed(2)}
+                        </del>
+
+                        <span class="text-success fw-bold ms-2">
+                            ${finalFee === 0 ? "FREE" : `$${finalFee.toFixed(2)}`}
+                        </span>
                     </span>
-                </span>
-            </div>
-        `;
-    } else {
-        delivery.innerHTML = `
-            <div class="d-flex justify-content-between mb-2">
-                <span>
-                    Delivery
-                </span>
-                <span>
-                    $${summary.deliveryFee.toFixed(2)}
-                </span>
-            </div>
-        `;
+                </div>
+            `;
+
+        } else {
+            // Base delivery fee, no discount
+            delivery.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>${deliveryDiscount.name}</span>
+
+                    <span>
+                        $${finalFee.toFixed(2)}
+                    </span>
+                </div>
+            `;
+        }
     }
     document.getElementById("summary-savings").innerText = savings.toFixed(2);
 }

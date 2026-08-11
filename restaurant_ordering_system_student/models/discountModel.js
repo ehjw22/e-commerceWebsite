@@ -91,7 +91,7 @@ class DiscountModel {
                     continue;
                 if (item.quantity < Number(discount.minTrigger))
                     continue;
-                
+
                 const highestTier = availableDiscounts
                     .filter(d =>
                         d.discountType === DISCOUNT_TYPES.PRODUCT_QUANTITY &&
@@ -142,26 +142,39 @@ class DiscountModel {
 
             if (discount.discountType === DISCOUNT_TYPES.DELIVERY) {
 
-                const min = Number(discount.minTrigger);
+                const applicableDeliveryTiers = availableDiscounts
+                    .filter(d =>
+                        d.discountType === DISCOUNT_TYPES.DELIVERY &&
+                        subtotal >= Number(d.minTrigger) &&
+                        subtotal <= (
+                            d.maxTrigger == null
+                                ? Infinity
+                                : Number(d.maxTrigger)
+                        )
+                    ).sort((a, b) => Number(b.minTrigger) - Number(a.minTrigger));
 
-                const max =
-                    discount.maxTrigger == null
-                        ? Infinity
-                        : Number(discount.maxTrigger);
+                // Get the highest applicable delivery tier
+                const highestTier = applicableDeliveryTiers[0];
 
-                if (subtotal >= min && subtotal <= max) {
-
-                    deliveryFee = Number(discount.value);
-
-                    // Don't show the base delivery fee as a discount
-                    if (discount.discountId !== baseDeliveryDiscount?.discountId) {
-                        appliedDiscounts.push({
-                            discountId: discount.discountId,
-                            name: discount.name,
-                            amount: baseDeliveryFee - deliveryFee
-                        });
-                    }
+                // Only process the highest applicable tier
+                if (discount.discountId !== highestTier.discountId) {
+                    continue;
                 }
+
+                // Apply the selected delivery fee
+                deliveryFee = Number(highestTier.value);
+
+                // Calculate how much was saved compared to base fee
+                const deliverySavings = baseDeliveryFee - deliveryFee;
+
+                appliedDiscounts.push({
+                    discountId: highestTier.discountId,
+                    name: highestTier.name,
+                    amount: deliverySavings,
+                    originalFee: baseDeliveryFee,
+                    finalFee: deliveryFee,
+                    discountType: DISCOUNT_TYPES.DELIVERY
+                });
             }
         }
 
