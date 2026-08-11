@@ -12,6 +12,9 @@ router.get("/", ensureAuthenticated, DiscountController.getDiscounts);
 // GET /discounts/:id
 router.get("/:id", ensureAuthenticated, DiscountController.getDiscountById);
 
+// POST /discounts
+router.post("/", ensureAuthenticated, DiscountController.createDiscount);
+
 // DELETE /discounts/:id
 router.delete("/:id", ensureAuthenticated, DiscountController.deleteDiscount);
 
