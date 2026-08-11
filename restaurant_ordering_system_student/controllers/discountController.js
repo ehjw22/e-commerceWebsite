@@ -43,6 +43,25 @@ class DiscountController {
             );
         }
     }
+
+    // GET /:id (Retrieve one discount)
+    static async getDiscountById(req, res) {
+        try {
+            const discount = await DiscountModel.getDiscountById(req.params.id);
+
+            res.json({
+                success: true,
+                data: discount
+            });
+        } catch (error) {
+            DiscountController.handleError(
+                res,
+                error,
+                "Failed to retrieve discount."
+            );
+        }
+    }
+
 }
 
 module.exports = DiscountController;
