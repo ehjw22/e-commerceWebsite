@@ -248,6 +248,23 @@ class DiscountModel {
 
         return discount;
     }
+
+    // Delete Discount
+    static async deleteDiscount(discountId) {
+        discountId = Number(discountId);
+
+        if (isNaN(discountId)) {
+            throw new ValidationError("Invalid discount id.");
+        }
+
+        await this.getDiscountById(discountId);
+
+        return await prisma.discount.delete({
+            where: {
+                discountId
+            }
+        });
+    }
 }
 
 module.exports = {
