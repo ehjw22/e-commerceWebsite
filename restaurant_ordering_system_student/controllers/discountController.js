@@ -81,6 +81,25 @@ class DiscountController {
         }
     }
 
+    // PUT /:id (Update discount)
+    static async updateDiscount(req, res) {
+        try {
+            const discount = await DiscountModel.updateDiscount(req.params.id, req.body);
+
+            res.json({
+                success: true,
+                message: "Discount updated successfully.",
+                data: discount
+            });
+        } catch (error) {
+            DiscountController.handleError(
+                res,
+                error,
+                "Failed to update discount."
+            );
+        }
+    }
+
     // DELETE /:id (Delete discount)
     static async deleteDiscount(req, res) {
         try {
