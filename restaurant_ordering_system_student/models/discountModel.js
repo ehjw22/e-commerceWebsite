@@ -218,6 +218,36 @@ class DiscountModel {
         });
 
     }
+
+    // Get discount by ID
+    static async getDiscountById(discountId) {
+
+        discountId = Number(discountId);
+
+        if (isNaN(discountId)) {
+            throw new ValidationError("Invalid discount id.");
+        }
+
+        const discount = await prisma.discount.findUnique({
+            where: {
+                discountId
+            },
+            include: {
+                targetProduct: {
+                    select: {
+                        productId: true,
+                        name: true
+                    }
+                }
+            }
+        });
+
+        if (!discount) {
+            throw new NotFoundError("Discount not found.");
+        }
+
+        return discount;
+    }
 }
 
 module.exports = {
