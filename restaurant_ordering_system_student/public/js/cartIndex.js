@@ -20,6 +20,11 @@ async function fetchCartItems() {
 
         cartItems = data.rows;
         renderCart();
+
+        if (cartItems.length === 0) {
+            return
+        }
+        
         await updateSummary();
     } catch (error) {
         console.error('Error fetching cart:', error);
