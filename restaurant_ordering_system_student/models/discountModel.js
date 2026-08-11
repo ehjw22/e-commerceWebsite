@@ -73,8 +73,7 @@ class DiscountModel {
                 d.discountType === "DELIVERY" &&
                 Number(d.minTrigger) === 0
         );
-
-        let baseDeliveryFee = baseDeliveryDiscount
+        const baseDeliveryFee = Number(baseDeliveryDiscount.value)
 
         let deliveryFee = baseDeliveryFee;
 
