@@ -66,6 +66,51 @@ class Product {
             throw error;
         }
     }
+
+    static async update(productId, name, description, price, category) {
+        const cleanProductId = this.validatePositiveInteger(productId, 'Product ID');
+
+        // Validate name
+        if (typeof name !== 'string' || name.trim().length === 0) {
+            throw new ValidationError('Product name is required.');
+        }
+
+        // Validate description
+        if (description !== null && description !== undefined && typeof description !== 'string') {
+            throw new ValidationError('Description must be a string.');
+        }
+
+        // Validate category
+        if (typeof category !== 'string' || category.trim().length === 0) {
+            throw new ValidationError('Product category is required.');
+        }
+
+        // Validate price
+        const cleanPrice = Number(price);
+
+        if (!Number.isFinite(cleanPrice) || cleanPrice < 0) {
+            throw new ValidationError('Price must be a valid non-negative number.');
+        }
+
+        try {
+            return await prisma.product.update({
+                where: {
+                    productId: cleanProductId
+                },
+                data: {
+                    name: name.trim(),
+                    description: description === null || description === undefined ? null : description.trim(),
+                    price: cleanPrice,
+                    category: category.trim()
+                }
+            });
+        } catch (error) {
+            if (error.code === 'P2025') {
+                throw new NotFoundError('Product not found.');
+            }
+            throw error;
+        }
+    }
 }
 
 module.exports = Product;
