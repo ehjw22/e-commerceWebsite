@@ -235,11 +235,25 @@ class CartModel {
     }
 
     // Place the order by calling the PostgreSQL stored procedure
-    static async placeOrder(memberId, deliveryAddress, totalAmt) {
+    static async placeOrder(memberId, deliveryAddress, totalAmt, discountSummary) {
         const cleanMemberId = this.validatePositiveInteger(memberId, "Member ID");
 
-        await prisma.$executeRaw`CALL place_orders(${Number(cleanMemberId)}::INT, ${totalAmt}::DECIMAL, ${deliveryAddress})`;
+        const result = await prisma.$queryRaw`CALL place_orders(${Number(cleanMemberId)}::INT, ${totalAmt}::DECIMAL, NULL::INT, ${deliveryAddress})`;
 
+        const orderId = result[0].p_order_id;
+
+        if (!orderId) {
+            throw new Error("Order could not be created.");
+        }
+
+        for (const discount of discountSummary.discounts) {
+            await prisma.saleDiscount.create({
+                data: {
+                    saleOrderId: orderId,
+                    discountId: discount.discountId
+                }
+            });
+        }
         return {message: "Order placed successfully."};
     }
 }

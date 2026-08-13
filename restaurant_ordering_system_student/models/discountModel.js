@@ -178,23 +178,6 @@ class DiscountModel {
             }
         }
 
-        await prisma.saleDiscount.deleteMany({
-            where: {
-                saleOrderId: cart.cartId
-            }
-        });
-
-        for (const discount of appliedDiscounts) {
-            await prisma.saleDiscount.create({
-                data: {
-                    saleOrderId:
-                        cart.cartId,
-                    discountId:
-                        discount.discountId
-                }
-            });
-        }
-
         const total = subtotal - totalDiscount + deliveryFee;
 
         return {

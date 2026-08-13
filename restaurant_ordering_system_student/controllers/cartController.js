@@ -190,8 +190,8 @@ class CartController {
                     message: "Unauthorized access: Please log in."
                 });
             }
-
-            const result = await CartModel.placeOrder(memberId, req.body.deliveryAddress, req.body.finalAmount);
+            const discountSummary = await DiscountModel.calculateDiscounts(memberId);
+            const result = await CartModel.placeOrder(memberId, req.body.deliveryAddress, req.body.finalAmount, discountSummary);
 
             res.json({
                 success: true,
