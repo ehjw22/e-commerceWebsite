@@ -247,4 +247,42 @@ router.put('/:id/availability', async (req, res) => {
   }
 });
 
+// PUT /products/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {name, description, price, category} = req.body;
+
+        const product = await ProductModel.update(id, name, description, price, category);
+
+        res.json({
+            success: true,
+            message: 'Product successfully updated.',
+            product: product
+        });
+
+    } catch (error) {
+        console.error('Error updating product:', error);
+
+        if (error instanceof ValidationError) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (error instanceof NotFoundError) {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update product'
+        });
+    }
+});
+
 module.exports = router;
