@@ -121,17 +121,28 @@ model cartItem {
   @@map("cart_item")
 }
 
+enum DiscountType {
+  PRODUCT_QUANTITY
+  CART_TOTAL
+  DELIVERY
+}
+
+enum ValueType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
 model discount {
   discountId      Int            @id @default(autoincrement()) @map("discount_id")
   name            String         @db.VarChar(100)
   description     String?
-  discountType    String         @map("discount_type") @db.VarChar(50) // one of the following values: "PRODUCT_QUANTITY", "CART_TOTAL", "DELIVERY"
-  minTrigger      Decimal        @map("min_trigger") @db.Decimal(10, 2)// can be used for all three
+  discountType    DiscountType   @map("discount_type")
+  minTrigger      Decimal        @map("min_trigger") @db.Decimal(10, 2)
   maxTrigger      Decimal?       @map("max_trigger") @db.Decimal(10, 2)
   value           Decimal        @db.Decimal(10, 2)
   targetProductId Int?           @map("target_product_id")
   isActive        Boolean?       @default(true) @map("is_active")
-  valueType       String         @map("value_type")
+  valueType       ValueType      @map("value_type")
   saleDiscount    saleDiscount[]
   targetProduct   product?       @relation(fields: [targetProductId], references: [productId], onDelete: Cascade)
 }
