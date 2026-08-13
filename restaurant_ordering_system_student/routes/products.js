@@ -2,7 +2,22 @@
 const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
+const ProductModel = require('../models/Product');
+class ValidationError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+        this.statusCode = 400; // Bad Request
+    }
+}
 
+class NotFoundError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'NotFoundError';
+        this.statusCode = 404; // Not Found
+    }
+}
 // GET /products - retrieve all products (member view)
 router.get('/', async (req, res) => {
   try {
@@ -191,6 +206,44 @@ router.post('/purchase', async (req, res) => {
 
   } finally {
     client.release();
+  }
+});
+
+// PUT /products/:id/availability
+router.put('/:id/availability', async (req, res) => {
+  try {
+      const { id } = req.params;
+      const { is_available } = req.body;
+
+      const product = await ProductModel.updateAvailability(id, is_available);
+
+      res.json({
+          success: true,
+          message: `Product ${is_available ? 'is now available': 'is now unavailable'}`,
+          product: product
+      });
+
+  } catch (error) {
+      console.error('Error updating product availability:', error);
+
+      if (error instanceof ValidationError) {
+          return res.status(400).json({
+              success: false,
+              message: error.message
+          });
+      }
+
+      if (error instanceof NotFoundError) {
+          return res.status(404).json({
+              success: false,
+              message: error.message
+          });
+      }
+
+      res.status(500).json({
+          success: false,
+          message: 'Failed to update product availability'
+      });
   }
 });
 
