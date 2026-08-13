@@ -22,7 +22,6 @@ class NotFoundError extends Error {
 }
 
 class CartModel {
-
     static validatePositiveInteger(value, fieldName, allowZero = false) {
         if (value === undefined || value === null || value === '') {
             throw new ValidationError(`${fieldName} is required.`);
@@ -194,11 +193,7 @@ class CartModel {
 
     // Retrieve checkout summary (available + unavailable items)
     static async getCheckoutSummary(memberId) {
-
-        const cleanMemberId = this.validatePositiveInteger(
-            memberId,
-            "Member ID"
-        );
+        const cleanMemberId = this.validatePositiveInteger(memberId, "Member ID");
 
         const userCart = await prisma.cart.findUnique({
             where: {
@@ -214,9 +209,7 @@ class CartModel {
         });
 
         if (!userCart) {
-            throw new NotFoundError(
-                "Shopping cart record not found."
-            );
+            throw new NotFoundError("Shopping cart record not found.");
         }
 
         // Split items into available and unavailable
@@ -229,11 +222,7 @@ class CartModel {
         );
 
         // Reuse the existing discount logic
-        const summary =
-            await DiscountModel.calculateDiscounts(
-                cleanMemberId,
-                availableItems
-            );
+        const summary = await DiscountModel.calculateDiscounts(cleanMemberId, availableItems);
 
         return {
             availableItems,
@@ -243,30 +232,15 @@ class CartModel {
             deliveryFee: summary.deliveryFee,
             total: summary.total
         };
-
     }
 
     // Place the order by calling the PostgreSQL stored procedure
     static async placeOrder(memberId, deliveryAddress, totalAmt) {
+        const cleanMemberId = this.validatePositiveInteger(memberId, "Member ID");
 
-        const cleanMemberId =
-            this.validatePositiveInteger(
-                memberId,
-                "Member ID"
-            );
+        await prisma.$executeRaw`CALL place_orders(${Number(cleanMemberId)}::INT, ${totalAmt}::DECIMAL, ${deliveryAddress})`;
 
-        await prisma.$executeRaw`
-            CALL place_orders(
-                ${Number(cleanMemberId)}::INT,
-                ${totalAmt}::DECIMAL,
-                ${deliveryAddress}
-            )
-        `;
-
-        return {
-            message: "Order placed successfully."
-        };
-
+        return {message: "Order placed successfully."};
     }
 }
 

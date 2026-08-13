@@ -218,7 +218,13 @@ async function placeOrder() {
     }
 
     try {
-        const deliveryAddress = document.getElementById("delivery-address").value.trim()
+        const deliveryAddress = document.getElementById("delivery-address").value.trim();
+
+        if (!deliveryAddress) {
+            alert('Please enter your delivery address.');
+            return;
+        }
+
         const response = await fetch("/cart/checkout", {
             method: "POST",
             headers: {
