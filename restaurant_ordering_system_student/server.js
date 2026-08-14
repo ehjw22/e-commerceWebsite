@@ -36,6 +36,7 @@ app.use('/cart', require('./routes/cart'));
 app.use('/discounts', require('./routes/discounts.js'));
 app.use('/discount', require('./routes/discountsPage.js'));
 app.use('/product-management', require('./routes/productAdminPage.js'))
+app.use('/member', require('./routes/memberDiscountsPage.js'));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
